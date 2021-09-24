@@ -1,0 +1,175 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui" xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.procedimentos}</ui:define>
+
+    <ui:define name="content">
+        <f:metadata>
+            <f:viewParam name="especialistaId" value="#{procedimentoEspecialistaListBean.especialistaId}"
+                         required="true"
+                         requiredMessage="#{m.requiredParams}"/>
+            <f:viewAction action="#{procedimentoEspecialistaListBean.init}"
+                          if="#{not empty procedimentoEspecialistaListBean.especialistaId}"/>
+        </f:metadata>
+
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('cadastrar') or loginBean.admin}"
+               var="permissaoCadastrar"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('editar') or loginBean.admin}"
+               var="permissaoEditar"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('liberar') or loginBean.admin}"
+               var="permissaoLiberarProcedimento"/>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <o:form includeRequestParams="true" includeViewParams="true">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.especialistas}" url="/pages/especialista/especialistashabilitados.xhtml"/>
+                        <p:menuitem value="#{m.editar}"
+                                    url="/pages/especialista/editar.xhtml?especialistaId=#{procedimentoEspecialistaListBean.especialistaId}"/>
+                        <p:menuitem value="#{m.procedimentoEspecialista}" url="#" styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </o:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h2>#{procedimentoEspecialistaListBean.especialista.nome}</h2>
+                <h:form>
+                    <p:tabMenu activeIndex="#{param.i}">
+                        <p:menuitem value="#{m.especialista}" outcome="/pages/especialista/editar"
+                                    icon="fa fa-fw fa-user-md">
+                            <f:param name="i" value="0"/>
+                            <f:param name="especialistaId" value="#{procedimentoEspecialistaListBean.especialistaId}"/>
+                        </p:menuitem>
+                        <p:menuitem value="#{m.convenios}" outcome="/pages/especialista/convenio"
+                                    icon="fa fa-fw fa-plus-square">
+                            <f:param name="i" value="1"/>
+                            <f:param name="especialistaId" value="#{procedimentoEspecialistaListBean.especialistaId}"/>
+                        </p:menuitem>
+                        <p:menuitem value="#{m.procedimentos}" outcome="/pages/especialista/procedimento"
+                                    icon="fa fa-fw fa-plus-square">
+                            <f:param name="i" value="2"/>
+                            <f:param name="especialistaId" value="#{procedimentoEspecialistaListBean.especialistaId}"/>
+                        </p:menuitem>
+                    </p:tabMenu>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <o:form id="form" includeRequestParams="true" includeViewParams="true">
+                    <ui:fragment rendered="#{permissaoCadastrar}">
+                        <div class="card">
+                            <p:link value="#{m.cadastrarProcedimentoParaEspecialista}"
+                                    outcome="criarprocedimentoespecialista">
+                                <f:param name="especialistaId"
+                                         value="#{procedimentoEspecialistaListBean.especialistaId}"/>
+                            </p:link>
+                        </div>
+                    </ui:fragment>
+                    <div class="card">
+                        <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:selectOneMenu
+                                    value="#{procedimentoEspecialistaListBean.procedimentoEspecialista.procedimentoConvenio.convenio}"
+                                    converter="entityConverter">
+                                <f:selectItem value="#{null}" itemLabel="#{m.selecioneUmConvenio}"/>
+                                <f:selectItems value="#{procedimentoEspecialistaListBean.convenioList}" var="convenio"
+                                               itemValue="#{convenio}" itemLabel="#{convenio.nome}"/>
+                                <p:ajax event="change" process="@this" update="procedimento"
+                                        listener="#{procedimentoEspecialistaListBean.loadProcedimentoByConvenio}"/>
+                            </p:selectOneMenu>
+                            <p:selectOneMenu
+                                    value="#{procedimentoEspecialistaListBean.procedimentoEspecialista.procedimentoConvenio.procedimento}"
+                                    converter="entityConverter" id="procedimento">
+                                <f:selectItem value="#{null}" itemLabel="#{m.selecioneUmProcedimento}"/>
+                                <f:selectItems value="#{procedimentoEspecialistaListBean.procedimentoConvenioList}"
+                                               var="procedimentoConvenio"
+                                               itemValue="#{procedimentoConvenio.procedimento}"
+                                               itemLabel="#{procedimentoConvenio.procedimento.nome}"/>
+                            </p:selectOneMenu>
+                            <p:commandButton value="#{m.buscar}"
+                                             actionListener="#{procedimentoEspecialistaListBean.search}"
+                                             update="dataTable"/>
+                        </p:panelGrid>
+                    </div>
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                        <!--<p:remoteCommand name="onCellEdit" process="@this" update="dataTable" ignoreAutoUpdate="true"/>-->
+                        <p:dataTable id="dataTable" var="procedimentoEspecialista"
+                                     value="#{procedimentoEspecialistaListBean.procedimentoEspecialistaList}"
+                                     rows="15"
+                                     paginator="true"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     editable="true" editMode="cell"
+                                     paginatorPosition="bottom"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="15,20,25"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <!--<p:ajax event="cellEdit"-->
+                            <!--listener="#{especialistaProcedimentoListBean.onCellEdit(procedimentoEspecialista)}"-->
+                            <!--oncomplete="onCellEdit();"/>-->
+                            <f:facet name="header">
+                                <h:outputText value="#{m.procedimentoEspecialista}"/>
+                            </f:facet>
+                            <p:column headerText="#{m.convenio}">
+                                <h:outputText value="#{procedimentoEspecialista.procedimentoConvenio.convenio.nome}"/>
+                            </p:column>
+                            <p:column headerText="#{m.procedimento}">
+                                <h:outputText
+                                        value="#{procedimentoEspecialista.procedimentoConvenio.procedimento.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.valorRepasse}">
+                                <p:cellEditor>
+                                    <f:facet name="output"><h:outputText
+                                            value="#{procedimentoEspecialista.repasse}"/></f:facet>
+                                    <f:facet name="input"><p:inputNumber value="#{procedimentoEspecialista.repasse}"
+                                                                         rendered="#{permissaoEditar}">
+                                        <p:ajax event="blur" update="dataTable form-btnAtualizar"
+                                                listener="#{procedimentoEspecialistaListBean.onCellRepasseEdit(procedimentoEspecialista)}"/>
+                                    </p:inputNumber>
+                                    </f:facet>
+                                </p:cellEditor>
+                            </p:column>
+                            <p:column headerText="#{m.porcentagem}">
+                                <p:cellEditor>
+                                    <f:facet name="output"><h:outputText
+                                            value="#{procedimentoEspecialista.porcentagem}"/></f:facet>
+                                    <f:facet name="input">
+                                        <p:inputNumber value="#{procedimentoEspecialista.porcentagem}"
+                                                       rendered="#{permissaoEditar}">
+                                            <p:ajax event="blur" update="dataTable form-btnAtualizar"
+                                                    listener="#{procedimentoEspecialistaListBean.onCellPorcentagemEdit(procedimentoEspecialista)}"/>
+                                        </p:inputNumber>
+                                    </f:facet>
+                                </p:cellEditor>
+                            </p:column>
+                            <p:column headerText="#{m.liberarProcedimento}">
+                                <p:inputSwitch value="#{procedimentoEspecialista.liberado}" onLabel="Sim" offLabel="Não" rendered="#{permissaoLiberarProcedimento}">
+                                    <p:ajax listener="#{procedimentoEspecialistaListBean.onCellLiberadoEdit(procedimentoEspecialista)}" update="dataTable form-btnAtualizar"/>
+                                </p:inputSwitch>
+                            </p:column>
+                        </p:dataTable>
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group" id="gridBtnRemover">
+                            <p:commandButton value="#{m.atualizar}" id="btnAtualizar"
+                                             actionListener="#{procedimentoEspecialistaListBean.update}"
+                                             disabled="#{procedimentoEspecialistaListBean.procedimentoEspecialistaEditadoSet == null || procedimentoEspecialistaListBean.procedimentoEspecialistaEditadoSet.isEmpty()}"
+                                             update="dataTable" style="background-color: red"/>
+                        </p:panelGrid>
+                    </div>
+                </o:form>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

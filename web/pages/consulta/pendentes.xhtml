@@ -1,0 +1,153 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:of="http://omnifaces.org/functions"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.consultasPendentes}</ui:define>
+    <f:metadata>
+        <f:viewAction action="#{consultaPendenteBean.init}"/>
+    </f:metadata>
+    <ui:define name="content">
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.consultasPendentes}" url="/pages/consulta/pendentes.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <h:form id="formPendentes">
+
+            <div class="ui-g ui-fluid">
+                <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+
+                    <div class="card">
+
+                        <p:dataTable id="dataTable" value="#{consultaPendenteBean.listaConsultas}"
+                                     rows="15"
+                                     paginator="true"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     rowClasses="clickable"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="10,15,20,30"
+                                     var="consulta"
+                                     sortBy="#{consulta.horaInicio}"
+                                     paginatorPosition="bottom"
+                                     tableStyle="text-align: center; ">
+
+                            <p:column headerText="#{m.paciente}" sortBy="#{consulta.paciente.usuario.nome}"
+                                      filterBy="#{consulta.paciente.usuario.nome}"  filterMatchMode="contains">
+                                <h:link outcome="/pages/paciente/editar.xhtml" style="color: #000000;" value="#{consulta.paciente.usuario.nome}" >
+                                    <f:param name="pacienteId" value="#{consulta.paciente.id}"/>
+                                    <f:param name="usuarioId" value="#{consulta.paciente.usuario.id}"/>
+                                </h:link>
+
+                            </p:column>
+
+                            <p:column headerText="#{m.celular}" sortBy="#{consulta.paciente.usuario.nome}"
+                                      filterBy="#{consulta.paciente.usuario.nome}"  filterMatchMode="contains">
+                                <h:link outcome="/pages/paciente/editar.xhtml" style="color: #000000;" value="#{consulta.paciente.usuario.celular}" >
+                                    <f:param name="pacienteId" value="#{consulta.paciente.id}"/>
+                                    <f:param name="usuarioId" value="#{consulta.paciente.usuario.id}"/>
+                                </h:link>
+                            </p:column>
+
+                            <p:column headerText="#{m.telefone}" sortBy="#{consulta.paciente.usuario.nome}"
+                                      filterBy="#{consulta.paciente.usuario.nome}"  filterMatchMode="contains">
+                                <h:link outcome="/pages/paciente/editar.xhtml" style="color: #000000;" value="#{consulta.paciente.usuario.telefoneResidencia}" >
+                                    <f:param name="pacienteId" value="#{consulta.paciente.id}"/>
+                                    <f:param name="usuarioId" value="#{consulta.paciente.usuario.id}"/>
+                                </h:link>
+                            </p:column>
+
+                            <p:column headerText="#{m.especialista}" sortBy="#{consulta.agenda.especialista.nome}"
+                                      filterBy="#{consulta.agenda.especialista.nome}"  filterMatchMode="contains">
+
+                                <h:link outcome="/pages/paciente/editar.xhtml" style="color: #000000;" value="#{consulta.agenda.especialista.nome}" >
+                                    <f:param name="pacienteId" value="#{consulta.paciente.id}"/>
+                                    <f:param name="usuarioId" value="#{consulta.paciente.usuario.id}"/>
+                                </h:link>
+                            </p:column>
+
+                            <p:column headerText="#{m.horaDaConsulta}" sortBy="#{consulta.horaInicio}"
+                                      filterBy="#{consulta.horaInicio}"  filterMatchMode="contains">
+                                <h:link outcome="/pages/paciente/editar.xhtml" style="color: #000000;" value="#{of:formatDate(consulta.horaInicio,'HH:mm')}" >
+                                    <f:param name="pacienteId" value="#{consulta.paciente.id}"/>
+                                    <f:param name="usuarioId" value="#{consulta.paciente.usuario.id}"/>
+                                </h:link>
+                            </p:column>
+
+                            <p:column headerText="#{m.convenio}" sortBy="#{consulta.convenio.nome}"
+                                      filterBy="#{consulta.convenio.nome}"  filterMatchMode="contains">
+                                <h:link outcome="/pages/paciente/editar.xhtml" style="color: #000000;" value="#{consulta.convenio.nome}" >
+                                    <f:param name="pacienteId" value="#{consulta.paciente.id}"/>
+                                    <f:param name="usuarioId" value="#{consulta.paciente.usuario.id}"/>
+                                </h:link>
+                            </p:column>
+                            <p:column headerText="Status" sortBy="#{consulta.status.nome}"
+                                      filterBy="#{consulta.status.nome}"  filterMatchMode="contains">
+                                <p:commandButton id="changeStatus" value="#{consulta.status.nome}"
+                                                 action="#{consultaPendenteBean.setConsultaUpdate(consulta)}"
+                                                 update="formPendentes" oncomplete="PF('dlgStatus').show();">
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                        <p:dialog header="Alterar Status" widgetVar="dlgStatus" modal="true" height="200">
+                            <p:outputLabel value="Status" for="statusUpdate"/>
+
+                            <p:selectOneMenu value="#{consultaPendenteBean.statusEscolhido}" id="statusUpdate" converter="entityConverter">
+                                <f:selectItems value="#{consultaPendenteBean.statusChange}" var="statu" itemLabel="#{statu.nome}" />
+                            </p:selectOneMenu>
+
+                            <p:commandButton id="updateStatus" value="#{m.atualizar}"
+                                             type="submit"
+                                             action="#{consultaPendenteBean.updateStatus}">
+                            </p:commandButton>
+                        </p:dialog>
+
+                    </div>
+                </div>
+            </div>
+
+        </h:form>
+<!--
+        <h:form id="socketForm">
+            <h:inputHidden id="statusEscolhido" value="#{consultaPendenteBean.statusEscolhido}" />
+            <h:inputHidden id="idConsultorio" value="#{consultaPendenteBean.consultorio.id}" />
+            <h:inputHidden id="idConsulta" value="#{consultaPendenteBean.consultaUpdate.id}" />
+            <h:inputHidden id="horario" value="#{consultaPendenteBean.consultaUpdate.horaInicio}" />
+            <h:inputHidden id="dia" value="#{consultaPendenteBean.consultaUpdate.horaInicio}" />
+            <h:inputHidden id="nomeMedico" value="#{consultaPendenteBean.consultaUpdate.agenda.especialista.nome}" />
+
+        </h:form>
+
+        <script type="text/javascript">
+
+            function confirmaConsulta() {
+                var socket = io.connect('https://murmuring-chamber-91453.herokuapp.com/');
+                var idConsultorio = document.getElementById("socketForm-idConsultorio").value;
+                var status = document.getElementById("socketForm-statusEscolhido").value;
+                var idConsulta = document.getElementById("socketForm-idConsulta").value;
+                var horario = document.getElementById("socketForm-horario").value;
+                var dia = document.getElementById("socketForm-dia").value;
+                var nomeMedico = document.getElementById("socketForm-nomeMedico").value;
+                socket.emit("confirmaConsulta",  nomeMedico, dia, horario, idConsulta, idConsultorio, status);
+                console.log(dateSock);
+                console.log(socket);
+                return false;
+            }
+
+        </script>
+!-->
+    </ui:define>
+</ui:composition>
+

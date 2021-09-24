@@ -1,0 +1,161 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.prontuariosPaciente}</ui:define>
+
+    <ui:define name="content">
+        <f:metadata>
+            <f:viewParam name="pacienteId" value="#{pacienteProntuarioBean.pacienteId}"/>
+            <f:viewAction action="#{pacienteProntuarioBean.init()}"/>
+        </f:metadata>
+
+        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.paciente}" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.editarPaciente}" url="/pages/paciente/editar.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form>
+                    <p:tabMenu activeIndex="#{param.i}">
+                        <p:menuitem value="Perfil do Paciente" outcome="/pages/paciente/editar" icon="fa fa-fw fa-user">
+                            <f:param name="pacienteId" value="#{pacienteProntuarioBean.pacienteId}"/>
+                            <f:param name="i" value="0" />
+                        </p:menuitem>
+                        <p:menuitem value="Consultas do Paciente" outcome="/pages/paciente/consultas" icon="ui-icon-calendar">
+                            <f:param name="pacienteId" value="#{pacienteProntuarioBean.pacienteId}"/>
+                            <f:param name="i" value="1" />
+                        </p:menuitem>
+                        <p:menuitem value="Prontuário" outcome="/pages/paciente/prontuarios" icon="ui-icon-clipboard">
+                            <f:param name="i" value="2" />
+                        </p:menuitem>
+                        <p:menuitem value="Imagens e Videos" outcome="/pages/paciente/exames" icon="ui-icon-image">
+                            <f:param name="i" value="3" />
+                        </p:menuitem>
+                    </p:tabMenu>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <div class="card">
+                    <h:form id="form">
+                        <h:panelGrid columns="2" cellpadding="5" width="40%">
+                            <p:outputLabel value="#{m.convenio}" for="usuarioConvenio"/>
+                            <p:selectOneMenu id="usuarioConvenio" value="#{pacienteProntuarioBean.newUsuarioConvenio}"
+                                             converter="entityConverter" >
+                                <f:selectItem value="#{null}" itemLabel="Selecione um convênio"/>
+                                <f:selectItems var="usuarioConvenio" itemValue="#{usuarioConvenio}"
+                                               itemLabel="#{usuarioConvenio.convenio.nome}" value="#{pacienteProntuarioBean.usuarioConvenioList}"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="#{m.numeroCarteirinha}" for="carteirinha" />
+                            <p:inputText id="carteirinha" value="#{pacienteProntuarioBean.carteirinha}"/>
+
+                            <p:commandButton value="#{m.imprimirProntuario}" action="#{pacienteProntuarioBean.updateForm()}" oncomplete="PF('printDlg').show();">
+                            </p:commandButton>
+
+                        </h:panelGrid>
+
+                        <p:dialog header="#{m.prontuario}" widgetVar="printDlg" id="printDlg" height="100%"  width="100%" closable="true">
+                            <p:ajax event="close" update="printDlg"  />
+
+                            <p:confirmDialog widgetVar="confirmDlg" id="confirmDlg" message="Imprimir"  width="200px" closable="true">
+                                <h:panelGrid columns="3">
+                                <p:commandButton value="Sim" onclick="PF('confirmDlg').hide();"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check">
+                                    <p:printer target="printDlg" />
+                                </p:commandButton>
+
+                                <p:commandButton value="Cancelar" type="button" onclick="PF('confirmDlg').hide();PF('printDlg').hide();" styleClass="ui-confirmdialog-no" icon="ui-icon-close">
+                                </p:commandButton>
+                                </h:panelGrid>
+                            </p:confirmDialog>
+
+                            <h:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" >
+                                <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" >
+
+                            <p:outputLabel value="Número do Prontuário" for="numeroregistro"/>
+                            <h:outputText value="#{pacienteProntuarioBean.paciente.numeroRegistro}" id="numeroregistro"/>
+
+                            <p:outputLabel value="Data" for="data"/>
+                            <h:outputText value="#{pacienteProntuarioBean.data}"
+                                          id="data">
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>
+                            </h:outputText>
+
+                            <p:outputLabel value="Nome completo" for="nome"/>
+                            <h:outputText value="#{pacienteProntuarioBean.paciente.usuario.nome}" id="nome"/>
+
+                                <p:outputLabel value="Data de nascimento" for="nascimento"/>
+                                <h:outputText value="#{pacienteProntuarioBean.paciente.usuario.birthday}"
+                                              id="nascimento">
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                </h:outputText>
+
+                                    <p:outputLabel value="#{m.convenio}" for="convenio"/>
+                                    <h:outputText value="#{pacienteProntuarioBean.newUsuarioConvenio.convenio.nome}" id="convenio"/>
+
+                                    <p:outputLabel value="#{m.numeroCarteirinha}" for="carteirinha_txt" />
+                                    <h:outputText id="carteirinha_txt" value="#{pacienteProntuarioBean.carteirinha}"/>
+                            </p:panelGrid>
+
+                            </h:panelGrid>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                            <hr style="margin-top: 30px;  margin-bottom: 30px;  border-top: 2px solid #000;"></hr>
+                        </p:dialog>
+
+                     </h:form>
+
+                  </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+

@@ -1,0 +1,119 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui" xmlns:o="http://omnifaces.org/ui"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.paciente}</ui:define>
+
+    <ui:define name="content">
+        <c:set value="dd'/'MM'/'yyyy 'ás' hh:mm" var="diaPattern"/>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.paciente}" url="/pages/paciente/paciente.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form>
+                    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                    <div class="card">
+                        <p:link value="#{m.criarPaciente}" outcome="cadastrar"
+                                update="dataTable"/>
+                    </div>
+                        <div class="card card-w-title">
+                            <h1>Buscar Pacientes</h1>
+                            <o:validateOneOrMore id="oneOrMore" components="cpf nome nascimento celular telefone"
+                                                 message="#{m.warningFillAtLeastOneField}"/>
+                            <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                                <p:inputMask value="#{pacienteListBean.paciente.usuario.cpf}" id="cpf" placeholder="CPF"
+                                             mask="999.999.999-99"/>
+                                <p:inputText value="#{pacienteListBean.paciente.usuario.nome}" id="nome"
+                                             placeholder="Nome do Paciente"/>
+                                <p:calendar value="#{pacienteListBean.paciente.usuario.birthday}" id="nascimento"
+                                            placeholder="Data de Nascimento" pattern="dd/MM/yyyy" mask="true"/>
+                                <p:inputMask value="#{pacienteListBean.paciente.usuario.celular}" id="celular"
+                                             placeholder="Telefone Celular" mask="(99)99999-9999"/>
+                                <p:inputMask value="#{pacienteListBean.paciente.usuario.telefoneResidencia}"
+                                             id="telefone" placeholder="Telefone Residencial" mask="(99)9999-9999"/>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group">
+                                <p:commandButton id="btn" value="#{m.buscarPaciente}"
+                                                 actionListener="#{pacienteListBean.searchPacientes}"
+                                                 update="dataTable"/>
+                            </p:panelGrid>
+                        </div>
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                    <div class="card">
+                        <p:dataTable id="dataTable" var="paciente" value="#{pacienteListBean.pacienteList}" rows="10"
+                                     paginator="true"
+                                     paginatorPosition="bottom"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15"
+                                     tableStyle="text-align: center">
+
+                            <p:column headerText="Nome do Paciente">
+                                <h:outputText value="#{paciente.usuario.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="CPF">
+                                <h:outputText value="#{paciente.usuario.cpf}"/>
+                            </p:column>
+
+                            <p:column headerText="Data de Nascimento">
+                                <h:outputText value="#{paciente.usuario.birthday}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Telefone Celular">
+                                <h:outputText value="#{paciente.usuario.celular}"/>
+                            </p:column>
+
+                            <p:column headerText="Telefone Residencial" >
+                                <h:outputText value="#{paciente.usuario.telefoneResidencia}"/>
+                            </p:column>
+
+                            <!--<p:column headerText="Última Consulta" >
+                                <h:outputText style="color:red;font-weight: bold"
+                                              value="#{of:formatDate(paciente.ultimaConsulta.horaInicio,diaPattern)}"/>
+                            </p:column>-->
+
+                            <p:column headerText="#{m.editar}">
+                                <h:outputLink value="editar.xhtml">
+                                    <f:param name="pacienteId" value="#{paciente.id}"/>
+                                    <f:param name="usuarioId" value="#{paciente.usuario.id}"/>
+                                    <i class="fa fa-pencil"/>
+                                </h:outputLink>
+                            </p:column>
+                        </p:dataTable>
+
+                        <p:panelGrid columns="4" style="float: right; margin-bottom:40px; height:100px" styleClass="ui-panelgrid-blank form-group">
+                            <p:commandButton id="btnAgendar" value="#{m.agendarConsulta}"
+                                             actionListener="#{pacienteListBean.searchPacientes}"
+                                             update="dataTable"/>
+                        </p:panelGrid>
+
+                    </div>
+                </h:form>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>

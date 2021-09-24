@@ -1,0 +1,123 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.consultorio}</ui:define>
+    <f:metadata>
+        <f:viewAction action="#{consultorioConvenioBean.init}"/>
+    </f:metadata>
+    <ui:define name="content">
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.consultorio}" url="/pages/consultorio/consultorio.xhtml"/>
+                        <p:menuitem value="#{m.convenio}" url="/pages/consultorio/convenio.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form>
+                    <p:tabMenu activeIndex="#{param.i}">
+                        <p:menuitem value="Consultorio" outcome="/pages/consultorio/consultorio" icon="fa fa-fw fa-cog">
+                            <f:param name="i" value="0" />
+                        </p:menuitem>
+                        <p:menuitem value="Usuarios" outcome="/pages/consultorio/perfilpermissaolist" icon="fa fa-fw fa-user">
+                            <f:param name="i" value="1" />
+                        </p:menuitem>
+                        <p:menuitem value="#{m.convenios}" outcome="/pages/consultorio/convenio" icon="fa fa-fw fa-plus-square">
+                            <f:param name="i" value="2" />
+                        </p:menuitem>
+                    </p:tabMenu>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <div class="card">
+                    <h:form id="form">
+                        <div class="card">
+                            <p:link value="#{m.addNewConvenio}" outcome="adicionarconvenio"/>
+                            <br />
+                        </div>
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group">
+                            <p:commandButton value="#{m.removerConvenios}"
+                                             actionListener="#{consultorioConvenioBean.removeConvenioConsultorio}"
+                                             style="background-color: red" update="dataTable">
+                            </p:commandButton>
+                        </p:panelGrid>
+
+                        <p:messages id="message" showDetail="true" autoUpdate="true" closable="true"/>
+                        <p:dataTable id="dataTable" value="#{consultorioConvenioBean.conveniosConsultorio}"
+                                     var="convenioconsultorio"
+                                     rows="20"
+                                     paginator="true"
+                                     resizableColumns="true"
+                                     rowKey="#{convenioconsultorio.id}"
+                                     sortBy="#{convenioconsultorio.convenio.nome}"
+                                     selection="#{consultorioConvenioBean.consultorioConvenioSelected}"
+                                     reflow="true"
+                                     editable="true"
+                                     editMode="cell"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="20,40,60,80"
+                                     paginatorPosition="bottom"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <p:ajax event="cellEdit" update="dataTable" listener="#{consultorioConvenioBean.onCellEdit(convenioconsultorio)}"/>
+                            <f:facet name="header">
+                                <h:outputText value="#{m.conveniosConsultorio}"/>
+                            </f:facet>
+                            <p:column selectionMode="multiple"/>
+                            <p:column headerText="#{m.conveniosConsultorio}" sortBy="#{convenioconsultorio.convenio.nome}"
+                                      filterBy="#{convenioconsultorio.convenio.nome}"  filterMatchMode="contains">
+                                <h:outputText value="#{convenioconsultorio.convenio.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.codigoPrestador}" sortBy="#{convenioconsultorio.codPrestador}"
+                                      filterBy="#{convenioconsultorio.codPrestador}"  filterMatchMode="contains">
+                                <p:cellEditor>
+                                    <f:facet name="output">
+                                        <h:outputText value="#{convenioconsultorio.codPrestador}"/>
+                                    </f:facet>
+                                    <f:facet name="input">
+                                        <p:inputText id="codPrestador"
+                                                     value="#{convenioconsultorio.codPrestador}"
+                                                     onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"/>
+                                    </f:facet>
+                                </p:cellEditor>
+                            </p:column>
+                        </p:dataTable>
+
+                        <p:panelGrid columns="3" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                            <p:button value="#{m.cancelar}" outcome="/pages/paciente/paciente.xhtml"/>
+                            <p:commandButton value="#{m.atualizar}" id="atualizar"
+                                             action="#{consultorioConvenioBean.updateConvenio()}"
+                                             update="form"/>
+                        </p:panelGrid>
+
+                        <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                      oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 5000)"/>
+                        <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+                        <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false"
+                                  resizable="false"
+                                  showHeader="false">
+                            <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                        </p:dialog>
+                    </h:form>
+                    <br></br>
+                </div>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

@@ -1,0 +1,87 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.usuario}</ui:define>
+    <f:metadata>
+        <f:viewAction action="#{perfilPermissaoListBean.init}"/>
+    </f:metadata>
+    <ui:define name="content">
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.consultorio}" url="/pages/consultorio/consultorio.xhtml"/>
+                        <p:menuitem value="#{m.usuario}" url="/pages/consultorio/perfilpermissaolist.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form>
+                    <p:tabMenu activeIndex="#{param.i}">
+                        <p:menuitem value="Consultorio" outcome="/pages/consultorio/consultorio" icon="fa fa-fw fa-cog">
+                            <f:param name="i" value="0" />
+                        </p:menuitem>
+                        <p:menuitem value="Usuarios" outcome="/pages/consultorio/perfilpermissaolist" icon="fa fa-fw fa-user">
+                            <f:param name="i" value="1" />
+                        </p:menuitem>
+                        <p:menuitem value="#{m.convenios}" outcome="/pages/consultorio/convenio" icon="fa fa-fw fa-plus-square">
+                            <f:param name="i" value="2" />
+                        </p:menuitem>
+                    </p:tabMenu>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+        <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+        <div class="card">
+            <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+
+            <p:dataTable id="dataTable" value="#{perfilPermissaoListBean.perfilList}"
+                         rows="15"
+                         paginator="true"
+                         resizableColumns="true"
+                         reflow="true"
+                         paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="10,15,20,30"
+                         var="perfil"
+                         paginatorPosition="bottom"
+                         tableStyle="text-align: center; table-layout: auto">
+                <f:facet name="header">
+                    <h:outputText value="#{m.usuarios}"/>
+                </f:facet>
+
+                <p:column headerText="#{m.nome}" sortBy="#{perfil.nome}"
+                          filterBy="#{perfil.nome}"  filterMatchMode="contains">
+                    <h:outputText value="#{perfil.nome}"/>
+                </p:column>
+
+                <p:column headerText="#{m.tipo}" sortBy="#{perfil.alias}"
+                        filterBy="#{perfil.alias}"  filterMatchMode="contains">
+                    <h:outputText value="#{perfil.alias}"/>
+                </p:column>
+
+                <p:column headerText="#{m.editar}">
+                    <h:outputLink value="perfilpermissao.xhtml">
+                        <f:param name="perfilId" value="#{perfil.id}"/>
+                        <i class="fa fa-pencil"/>
+                    </h:outputLink>
+                </p:column>
+            </p:dataTable>
+        </div>
+        </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

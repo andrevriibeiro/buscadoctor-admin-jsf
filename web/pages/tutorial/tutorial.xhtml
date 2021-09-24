@@ -1,0 +1,51 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.tutorial}</ui:define>
+    <f:metadata>
+        <f:viewAction action="#{tutorialBean.init}"/>
+    </f:metadata>
+    <ui:define name="content">
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.tutorial}" url="/pages/tutorial/tutorial.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formFile">
+                    <a href="/files/guia_completo.pdf" target="_blank">#{m.visualizarTutorial}</a>
+                </h:form>
+                <br/>
+                <h:form>
+                    <p:dataTable var="tutorial" value="#{tutorialBean.tutorial}" sortBy="#{tutorial.grupo}"
+                                 expandableRowGroups="true" listener="#{tutorial.path}" >
+                        <p:headerRow>
+                            <p:column colspan="1">
+                                <h:outputText value="#{tutorial.grupo}" style="font-weight:bold" />
+                            </p:column>
+                        </p:headerRow>
+
+                        <p:column headerText="#{m.howtoUse}">
+                            <a href="#{tutorial.path}" target="_blank">
+                                <h:outputText value="#{tutorial.descricao}" style="font-size:15px"/>
+                            </a>
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

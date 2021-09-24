@@ -1,0 +1,66 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+
+    <div class="layout-sidebar-responsive">
+
+        <h:form>
+            <c:set var="urlConsulta" value="/pages/consulta/todas"/>
+            <c:set var="urlFaturamento" value="/pages/faturamento/faturamento"/>
+            <c:set var="urlFatura" value="/pages/fatura/fatura"/>
+            <c:set var="urlPaciente" value="/pages/paciente/paciente"/>
+            <c:set var="urlEspecialista" value="/pages/especialista/especialista"/>
+            <c:set var="urlConsultorio" value="/pages/consultorio/consultorio"/>
+            <c:set var="urlAgendamento" value="/pages/agendamento/agendamento"/>
+            <c:set var="todasConsultas"
+                   value="#{(loginBean.paginaPermissaoMap.get(urlConsulta) != null and loginBean.paginaPermissaoMap.get(urlConsulta).contains('visualizar')) || loginBean.admin}"/>
+            <c:set var="faturamento"
+                   value="#{(loginBean.paginaPermissaoMap.get(urlFaturamento) != null and loginBean.paginaPermissaoMap.get(urlFaturamento).contains('visualizar')) || loginBean.admin}"/>
+            <c:set var="fatura"
+                   value="#{(loginBean.paginaPermissaoMap.get(urlFatura) != null and loginBean.paginaPermissaoMap.get(urlFatura).contains('visualizar')) || loginBean.admin}"/>
+            <c:set var="paciente"
+                   value="#{(loginBean.paginaPermissaoMap.get(urlPaciente) != null and loginBean.paginaPermissaoMap.get(urlPaciente).contains('visualizar')) || loginBean.admin}"/>
+            <c:set var="especialista"
+                   value="#{(loginBean.paginaPermissaoMap.get(urlEspecialista) != null and loginBean.paginaPermissaoMap.get(urlEspecialista).contains('visualizar')) || loginBean.admin}"/>
+            <c:set var="consultorio"
+                   value="#{(loginBean.paginaPermissaoMap.get(urlConsultorio) != null and loginBean.paginaPermissaoMap.get(urlConsultorio).contains('visualizar')) || loginBean.admin}"/>
+            <c:set var="agendamento"
+                   value="#{(loginBean.paginaPermissaoMap.get(urlAgendamento) != null and loginBean.paginaPermissaoMap.get(urlAgendamento).contains('visualizar')) || loginBean.admin}"/>
+
+
+            <p:commandButton id="dynaButton" style="z-index: 999 !important;top: 63px;" icon="fa fa-bars"
+                             type="button"/>
+            <p:slideMenu overlay="true" trigger="dynaButton" my="left top" at="left bottom" style="width:180px">
+                <p:submenu label="Perfil da Clinica">
+                    <p:menuitem id="consultorio" value="#{m.consultorio}" icon="fa fa-fw fa-cog"
+                                outcome="/pages/consultorio/consultorio.xhtml" rendered="#{consultorio}"/>
+                    <p:menuitem id="especialista" value="#{m.especialista}" icon="fa fa-fw fa-user"
+                                outcome="/pages/especialista/especialista.xhtml" rendered="#{especialista}"/>
+                    <p:menuitem id="fatura" value="Fatura" icon="fa fa-fw fa-files-o"
+                                outcome="/pages/fatura/fatura.xhtml" rendered="#{fatura}"/>
+                    <p:menuitem id="faturamento" value="Faturamento" icon="fa fa-fw fa-home"
+                                outcome="/pages/faturamento/faturamento.xhtml" rendered="#{faturamento}"/>
+                </p:submenu>
+                <p:menuitem id="consultas" value="#{m.todasConsultas}" icon="fa fa-fw fa-clock-o"
+                            outcome="/pages/consulta/todas.xhtml"
+                            rendered="#{todasConsultas}"
+                            expanded="true"/>
+                <p:menuitem id="agendamento" value="Agendamento" icon="fa fa-fw fa-calendar"
+                            outcome="/pages/agendamento/agendamento.xhtml" rendered="#{agendamento}"/>
+                <p:menuitem id="paciente" value="Paciente" icon="fa fa-fw fa-user"
+                            outcome="/pages/paciente/paciente.xhtml" rendered="#{paciente}"/>
+            </p:slideMenu>
+        </h:form>
+
+        <div>
+
+        </div>
+
+
+    </div>
+
+</ui:composition>

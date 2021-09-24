@@ -1,0 +1,31 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:of="http://omnifaces.org/functions"
+                template="/WEB-INF/templates/templateConfirma.xhtml">
+
+    <ui:define name="title">#{m.confirmeSuaConsulta}</ui:define>
+
+    <ui:define name="content">
+        <h:form id="formPendentes">
+            <div class="ui-g ui-fluid">
+                <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                    <div class="card">
+                        <p:outputLabel> #{of:formatDate(consultaConfirmaBean.consultaConfirma.horaInicio,'dd/MM/yyyy')}
+                        </p:outputLabel>
+
+                        <br></br>
+                        <br></br>
+
+                        <h3>Consulta atualizada com sucesso!</h3>
+                    </div>
+                </div>
+            </div>
+
+        </h:form>
+        <script type="text/javascript">
+        </script>
+    </ui:define>
+</ui:composition>
+

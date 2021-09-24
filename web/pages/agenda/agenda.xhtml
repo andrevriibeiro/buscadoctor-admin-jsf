@@ -1,0 +1,193 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui"
+                xmlns:of="http://omnifaces.org/functions"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.agenda}</ui:define>
+    <f:metadata>
+        <f:viewParam name="especialistaId" value="#{agendaListBean.especialistaId}"/>
+        <f:viewParam name="especialistaNome" value="#{agendaListBean.especialistaNome}"/>
+        <f:viewParam name="inicio" value="#{agendaListBean.inicio}"/>
+        <f:viewParam name="fim" value="#{agendaListBean.fim}"/>
+        <f:viewAction action="#{agendaListBean.init}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <o:importConstants type="br.com.devdojo.projetoinicial.persistence.model.enums.AgendaTipoEnum"/>
+        <o:importConstants type="br.com.devdojo.projetoinicial.persistence.model.enums.DiasDaSemanaEnum"/>
+        <c:set value="EEEEEEEE, dd 'de' MMMM 'de' yyyy" var="diaPattern"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('editar') or loginBean.admin}"
+               var="permissaoEditar"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('liberarAgenda') or loginBean.admin}"
+               var="permissaoLiberarAgenda"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('visivelApp') or loginBean.admin}"
+               var="permissaoVisivelApp"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('criarDiaria') or loginBean.admin}"
+               var="permissaoCriarDiaria"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('criarMensal') or loginBean.admin}"
+               var="permissaoCriarMensal"/>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-9" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.especialistas}" url="/pages/especialista/especialistashabilitados.xhtml"/>
+                        <p:menuitem value="#{m.agenda}"
+                                    url="#"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-9" style="margin: 0 auto;">
+                <h:form id="form">
+                    <div class="card">
+                        <h4> Especialista: #{agendaListBean.especialistaNome} </h4>
+                        <br/>
+                        <h:panelGroup id="link">
+                            <p:panelGrid columns="4" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                                <p:link value="#{m.cadastrarAgendaDiaria}" outcome="criardiaria"
+                                        rendered="#{permissaoCriarDiaria}">
+                                    <f:param name="especialistaId" value="#{agendaListBean.especialistaId}"/>
+                                    <o:param name="inicio" value="#{agendaListBean.agenda.dataInicio}"
+                                             converter="dateToStringDDMMYYYYConverter"/>
+                                    <o:param name="fim" value="#{agendaListBean.agenda.dataFinal}"
+                                             converter="dateToStringDDMMYYYYConverter"/>
+                                </p:link>
+                                <p:link value="#{m.cadastrarAgendaMensal}" outcome="criarmensal"
+                                        rendered="#{permissaoCriarMensal}">
+                                    <f:param name="especialistaId" value="#{agendaListBean.especialistaId}"/>
+                                    <f:param name="agendaTipoId" value="#{AgendaTipoEnum.MENSAL.id}"/>
+                                    <o:param name="inicio" value="#{agendaListBean.agenda.dataInicio}"
+                                             converter="dateToStringDDMMYYYYConverter"/>
+                                    <o:param name="fim" value="#{agendaListBean.agenda.dataFinal}"
+                                             converter="dateToStringDDMMYYYYConverter"/>
+                                </p:link>
+                                <p:link value="#{m.cadastrarAgendaQuinzenal}" outcome="criarmensal"
+                                        rendered="#{permissaoCriarMensal}">
+                                    <f:param name="especialistaId" value="#{agendaListBean.especialistaId}"/>
+                                    <f:param name="agendaTipoId" value="#{AgendaTipoEnum.QUINZENAL_MENSAL.id}"/>
+                                    <o:param name="inicio" value="#{agendaListBean.agenda.dataInicio}"
+                                             converter="dateToStringDDMMYYYYConverter"/>
+                                    <o:param name="fim" value="#{agendaListBean.agenda.dataFinal}"
+                                             converter="dateToStringDDMMYYYYConverter"/>
+                                </p:link>
+                            </p:panelGrid>
+                        </h:panelGroup>
+                    </div>
+                    <div class="card">
+                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group">
+
+                            <p:calendar value="#{agendaListBean.agenda.dataInicio}"
+                                        id="inicio"
+                                        mindate="#{agendaListBean.firstDayOfMonth}"
+                                        placeholder="#{m.dataInicio}" navigator="true"
+                                        pattern="dd/MM/yyyy"
+                                        mask="true" locale="#{loginBean.locale}">
+                                <p:ajax event="dateSelect" update="fim"/>
+                            </p:calendar>
+                            <p:calendar value="#{agendaListBean.agenda.dataFinal}"
+                                        id="fim"
+                                        mindate="#{agendaListBean.agenda.dataInicio}"
+                                        placeholder="#{m.dataFim}" navigator="true"
+                                        pattern="dd/MM/yyyy"
+                                        mask="true" locale="#{loginBean.locale}">
+                                <p:ajax event="dateSelect"/>
+                            </p:calendar>
+                            <p:commandButton value="#{m.buscar}" actionListener="#{agendaListBean.search}"
+                                             update="dataTable link"/>
+                        </p:panelGrid>
+                    </div>
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                        <p:dataTable id="dataTable" value="#{agendaListBean.agendaList}"
+                                     rows="15"
+                                     paginator="true"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="10,15,20,30"
+                                     var="agenda"
+                                     paginatorPosition="bottom"
+                                     tableStyle="text-align: center; table-layout: auto">
+
+                            <f:facet name="header">
+                                <h:outputText value="#{m.agendas}"/>
+                            </f:facet>
+                            <p:column headerText="#{m.dia}">
+                                <h:outputText value="#{of:formatDate(agenda.dataInicio,diaPattern)}"/>
+                            </p:column>
+
+                            <p:column headerText="#{agendaListBean.agendaTipoEnum.labelInicio}">
+                                <h:outputText
+                                        value="#{of:formatDate(agenda.dataInicio, agendaListBean.agendaTipoEnum.pattern)}"/>
+                            </p:column>
+                            <p:column headerText="#{agendaListBean.agendaTipoEnum.labelFim}">
+                                <h:outputText
+                                        value="#{of:formatDate(agenda.dataFinal, agendaListBean.agendaTipoEnum.pattern)}"/>
+                            </p:column>
+                            <p:column headerText="#{m.tempoDeConsulta}">
+                                <h:outputText value="#{agenda.tempoConsulta}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.editar}">
+                                <h:outputLink value="editardiaria"
+                                              disabled="#{agenda.dataFinal lt agendaListBean.today}"
+                                              rendered="#{permissaoEditar}">
+                                    <f:param name="especialistaId" value="#{agendaListBean.especialistaId}"/>
+                                    <o:param name="inicio" value="#{agendaListBean.agenda.dataInicio}"
+                                             converter="dateToStringDDMMYYYYConverter"/>
+                                    <o:param name="fim" value="#{agendaListBean.agenda.dataFinal}"
+                                             converter="dateToStringDDMMYYYYConverter"/>
+
+                                    <o:param name="dateAgendaInicio" value="#{agenda.dataInicio}"
+                                             converter="dateToStringYYYMMDDHHMMConverter"/>
+                                    <o:param name="dateAgendaFim" value="#{agenda.dataFinal}"
+                                             converter="dateToStringYYYMMDDHHMMConverter"/>
+                                    <i class="fa fa-pencil"/>
+                                </h:outputLink>
+                            </p:column>
+
+                            <p:column headerText="#{m.liberarAgenda}">
+                                <p:inputSwitch value="#{agenda.liberado}"
+                                               onLabel="Sim"
+                                               offLabel="Não"
+                                               rendered="#{permissaoLiberarAgenda}"
+                                               disabled="#{agendaListBean.agendasComConsulta.contains(agenda) or agenda.dataFinal lt agendaListBean.today}">
+                                    <p:ajax listener="#{agendaListBean.onCellEdit(agenda)}"/>
+                                </p:inputSwitch>
+                            </p:column>
+                            <p:column headerText="#{m.visivelApp}">
+                                <p:inputSwitch value="#{agenda.visivelApp}" onLabel="Sim" offLabel="Não"
+                                               rendered="#{permissaoVisivelApp}"
+                                               disabled="#{agenda.dataFinal lt agendaListBean.today}">
+                                    <p:ajax listener="#{agendaListBean.onCellEdit(agenda)}"/>
+                                </p:inputSwitch>
+                            </p:column>
+
+                        </p:dataTable>
+
+                    </div>
+                    <div class="card">
+                        <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:button value="#{m.cancelar}" outcome="/pages/especialista/especialistashabilitados"/>
+                        </p:panelGrid>
+                    </div>
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                  oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 5000)"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                </h:form>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

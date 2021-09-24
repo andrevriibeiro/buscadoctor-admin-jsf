@@ -1,0 +1,53 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+>
+    <f:metadata>
+        <f:viewAction action="#{contasPagarPrintBean.init}"/>
+    </f:metadata>
+
+
+    <p:dataTable id="dataTable" var="faturaProc" value="#{contasPagarPrintBean.faturaProcedimentosList}"
+                 rows="10"
+                 paginator="true"
+                 resizableColumns="true"
+                 reflow="true"
+                 paginatorPosition="bottom"
+                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                 rowsPerPageTemplate="5,10,15"
+                 tableStyle="text-align: center; table-layout: auto">
+        <f:facet name="header">
+            <h:outputText value="#{m.contasPagar}"/>
+        </f:facet>
+
+        <p:column headerText="#{m.especialista}">
+            <h:outputText value="#{faturaProc.procedimentoEspecialista.especialista.nome}"/>
+        </p:column>
+
+        <p:column headerText="#{m.paciente}">
+            <h:outputText value="#{faturaProc.fatura.paciente.usuario.nome}"/>
+        </p:column>
+
+        <p:column headerText="#{m.especialidade}">
+            <h:outputText value="#{faturaProc.consulta.especialidade.especialidade}"/>
+        </p:column>
+
+        <p:column headerText="#{m.numeroDaGuia}">
+            <h:outputText value="#{faturaProc.guia}"/>
+        </p:column>
+
+        <p:column headerText="#{m.dataDaConsulta}">
+            <h:outputText value="#{faturaProc.consulta.horaInicio}">
+                <f:convertDateTime pattern="dd/MM/yyyy"/>
+            </h:outputText>
+            <f:facet name="footer">
+                <h:outputText style="font-weight:bold" value="Valor total:" />
+            </f:facet>
+        </p:column>
+
+
+    </p:dataTable>
+</ui:composition>
+

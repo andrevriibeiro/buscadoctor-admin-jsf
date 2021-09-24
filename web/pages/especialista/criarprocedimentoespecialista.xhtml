@@ -1,0 +1,121 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui" xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.procedimentoEspecialista}</ui:define>
+
+    <ui:define name="content">
+        <f:metadata>
+            <f:viewParam name="especialistaId" value="#{procedimentoEspecialistaRegisterBean.especialistaId}"
+                         required="true"
+                         requiredMessage="#{m.requiredParams}"/>
+            <f:viewAction action="#{procedimentoEspecialistaRegisterBean.init}"
+                          if="#{not empty procedimentoEspecialistaRegisterBean.especialistaId}"/>
+        </f:metadata>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-6" style="margin: 0 auto;">
+                <o:form includeRequestParams="true" includeViewParams="true">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.especialistas}" url="/pages/especialista/especialistashabilitados.xhtml"/>
+                        <p:menuitem value="#{m.editar}"
+                                    url="/pages/especialista/editar.xhtml?especialistaId=#{procedimentoEspecialistaRegisterBean.especialistaId}"/>
+                        <p:menuitem
+                                value="#{m.procedimentoEspecialista}"
+                                url="/pages/especialista/procedimento.xhtml?especialistaId=#{procedimentoEspecialistaRegisterBean.especialistaId}"
+                                styleClass=""/>
+                        <p:menuitem
+                                value="#{m.cadastrarProcedimentoEspecialista}"
+                                url="#"
+                                styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </o:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-6" style="margin: 0 auto;">
+                <o:form id="form" includeRequestParams="true" includeViewParams="true">
+                    <div class="card">
+                        <h:link outcome="procedimento"
+                                value="#{m.procedimentoEspecialista}: #{procedimentoEspecialistaRegisterBean.especialista.nome}">
+                            <f:param name="especialistaId"
+                                     value="#{procedimentoEspecialistaRegisterBean.especialistaId}"/>
+                        </h:link>
+                    </div>
+                    <div class="card">
+                        <h2>#{m.cadastrarProcedimentoEspecialista}: #{procedimentoEspecialistaRegisterBean.especialista.nome}</h2>
+                        <p:panelGrid id="panelGrid" columns="1" styleClass="ui-panelgrid-blank form-group"
+                                     style="width: 60%">
+
+                            <p:outputLabel value="#{m.convenio}" for="convenio"/>
+                            <p:selectOneMenu
+                                    value="#{procedimentoEspecialistaRegisterBean.procedimentoEspecialista.procedimentoConvenio.convenio}"
+                                    converter="entityConverter" id="convenio" required="true"
+                                    requiredMessage="#{m.requiredConvenio}">
+                                <f:selectItem value="#{null}" itemLabel="#{m.selecioneUmConvenio}"/>
+                                <f:selectItems value="#{procedimentoEspecialistaRegisterBean.convenioList}"
+                                               var="convenio"
+                                               itemValue="#{convenio}" itemLabel="#{convenio.nome}"/>
+                                <p:ajax event="change" process="@this" update="procedimento"
+                                        listener="#{procedimentoEspecialistaRegisterBean.loadProcedimentoByConvenio}"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="#{m.procedimento}" for="procedimento"/>
+                            <p:selectOneMenu
+                                    value="#{procedimentoEspecialistaRegisterBean.procedimentoEspecialista.procedimentoConvenio}"
+                                    converter="entityConverter" id="procedimento" required="true"
+                                    requiredMessage="#{m.requiredProcedimento}">
+                                <f:selectItem value="#{null}" itemLabel="#{m.selecioneUmProcedimento}"/>
+                                <f:selectItems value="#{procedimentoEspecialistaRegisterBean.procedimentoConvenioList}"
+                                               var="procedimentoConvenio"
+                                               itemValue="#{procedimentoConvenio}"
+                                               itemLabel="#{procedimentoConvenio.procedimento.nome}"/>
+                            </p:selectOneMenu>
+                            <p:outputLabel value="#{m.valorRepasse}" for="repasse"/>
+                            <p:inputNumber
+                                    value="#{procedimentoEspecialistaRegisterBean.procedimentoEspecialista.repasse}"
+                                    id="repasse">
+                                <p:ajax event="blur" process="@this" partialSubmit="true"
+                                        listener="#{procedimentoEspecialistaRegisterBean.removePorcentagem}"
+                                        update="porcentagem"/>
+                            </p:inputNumber>
+                            <p:outputLabel value="#{m.porcentagem}" for="porcentagem"/>
+                            <p:inputNumber
+                                    value="#{procedimentoEspecialistaRegisterBean.procedimentoEspecialista.porcentagem}"
+                                    id="porcentagem">
+                                <p:ajax event="blur" partialSubmit="true" process="@this" listener="#{procedimentoEspecialistaRegisterBean.removeRepasse}"
+                                        update="repasse"/>
+                            </p:inputNumber>
+                        </p:panelGrid>
+                    </div>
+
+                    <div class="card">
+                        <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group">
+                            <h:outputLink
+                                    value="/pages/especialista/procedimento.xhtml?especialistaId=#{procedimentoEspecialistaRegisterBean.especialistaId}">
+                                <p:button value="#{m.cancelar}"/>
+                            </h:outputLink>
+                            <p:commandButton value="#{m.cadastrarProcedimento}"
+                                             action="#{procedimentoEspecialistaRegisterBean.create}"
+                                             update="@form"
+                                             oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 5000)"/>
+                        </p:panelGrid>
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                    </div>
+
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                    />
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                </o:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+

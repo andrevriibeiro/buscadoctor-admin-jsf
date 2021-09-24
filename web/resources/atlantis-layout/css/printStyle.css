@@ -1,0 +1,45 @@
+@page {
+    size: auto;
+    margin: 0;
+}
+
+.valorTotalOutPut{
+    font-weight:bold;color: #0c6351 !important;
+}
+
+.labelPrint {
+    margin-top: 3px; margin-left: 10px !important;
+    color: green !important;
+}
+
+.logoStyle {
+    width: 20% !important;
+    height: 11% !important;
+    float: left !important;
+}
+
+.printDivHeader {
+
+    margin-top: 15px !important;
+    justify-content: flex-start !important;
+}
+
+.printH1 {
+    font-weight: bolder !important;
+    margin-top: 12px !important;
+    margin-left: 20px !important;
+}
+
+.container{
+    margin-top: 20px;
+    text-align: center !important;
+}
+.containerContent {
+    display: inline-block !important;
+}
+.printGrid {
+margin-top: 30px;
+}
+.printGrid td{
+    padding: 5px 7px;
+}

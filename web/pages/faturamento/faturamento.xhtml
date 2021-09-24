@@ -1,0 +1,200 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.faturamentos}</ui:define>
+    <f:metadata>
+        <f:viewParam name="inicio" value="#{faturamentoListBean.inicio}"/>
+        <f:viewParam name="fim" value="#{faturamentoListBean.fim}"/>
+        <f:viewParam name="status" value="#{faturamentoListBean.statusFaturamentoParam}"/>
+        <f:viewAction action="#{faturamentoListBean.init}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <o:importConstants type="br.com.devdojo.projetoinicial.persistence.model.enums.StatusFaturamentoEnum"/>
+
+        <c:set value="#{faturamentoListBean.statusFaturamentoEnum.equals(StatusFaturamentoEnum.ABERTO)}" var="isFaturamentoAberto"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('fechar') or loginBean.admin}" var="permissaoFechar"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('editar') or loginBean.admin}" var="permissaoEditar"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('deletar') or loginBean.admin}" var="permissaoDeletar"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('cadastrar') or loginBean.admin}" var="permissaoCadastrar"/>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.faturamentos}" url="/pages/faturamento/faturamento.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="form">
+                    <div class="card">
+                        <p:link value="#{m.criarFaturamento}" outcome="criar"
+                                update="dataTable" rendered="#{permissaoCadastrar}"/>
+                    </div>
+                    <div class="card">
+                        <p:panelGrid columns="4" layout="grid" styleClass="ui-panelgrid-blank form-group">
+
+                            <p:selectOneMenu
+                                    value="#{faturamentoListBean.statusFaturamentoEnum}"
+                                    required="true" id="estadoCivil">
+                                <f:selectItems value="#{StatusFaturamentoEnum}" var="status"
+                                               itemValue="#{status}" itemLabel="#{status}"/>
+                                <p:ajax event="change" listener="#{faturamentoListBean.search}" update="dataTable gridBtnRemover"/>
+                            </p:selectOneMenu>
+                            <p:calendar value="#{faturamentoListBean.faturamento.inicio}"
+                                        id="inicio"
+                                        placeholder="#{m.dataInicio}" navigator="true"
+                                        pattern="dd/MM/yyyy"
+                                        mask="true" locale="#{loginBean.locale}"/>
+                            <p:calendar value="#{faturamentoListBean.faturamento.fim}"
+                                        id="fim"
+                                        locale="#{loginBean.locale}"
+                                        placeholder="#{m.dataFim}" navigator="true" pattern="dd/MM/yyyy"
+                                        mask="true"/>
+                            <p:selectCheckboxMenu id="advanced" value="#{faturamentoListBean.convenioIdListSelected}"
+                                                  var="convenio" filter="true" filterMatchMode="contains"
+                                                  label="Convênios">
+                                <f:selectItems value="#{applicationBean.convenioList}" var="c" itemLabel="#{c.nome}"
+                                               itemValue="#{c.id}"/>
+                            </p:selectCheckboxMenu>
+                            <p:commandButton value="#{m.buscar}" actionListener="#{faturamentoListBean.search}"
+                                             update="dataTable gridBtnRemover"/>
+                        </p:panelGrid>
+                    </div>
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                        <p:remoteCommand name="onCellEdit" process="@this" update="dataTable" ignoreAutoUpdate="true"/>
+
+                        <p:dataTable id="dataTable" value="#{faturamentoListBean.faturamentoList}"
+                                     rows="15"
+                                     paginator="true"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     selection="#{faturamentoListBean.faturamentoListSelected}"
+                                     rowKey="#{faturamento.id}"
+                                     editable="true" editMode="cell"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="10,15,20,30"
+                                     var="faturamento"
+                                     paginatorPosition="bottom"
+                                     disabledSelection="#{faturamentoListBean.disabledSelection(faturamento)}"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <f:facet name="header">
+                                <h:outputText value="#{m.faturamentos}"/>
+                            </f:facet>
+                            <p:ajax event="cellEdit" listener="#{faturamentoListBean.onCellEdit(faturamento)}"
+                                    oncomplete="onCellEdit();"/>
+
+                            <p:column selectionMode="multiple" style="width:16px;"/>
+
+                            <p:column headerText="#{m.dataDeCriacao}">
+                                <h:outputText value="#{faturamento.createdAt}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="#{m.numeroNotaFiscal}">
+                                <p:cellEditor>
+                                    <f:facet name="output"> <h:outputText value="#{faturamento.numero}"/></f:facet>
+                                    <f:facet name="input"><p:inputText id="numeroFaturamento" rendered="#{isFaturamentoAberto}"
+                                                                       value="#{faturamento.numero}"
+                                                                       onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"/></f:facet>
+                                </p:cellEditor>
+                            </p:column>
+
+                            <p:column headerText="#{m.dataDoRecebimento}">
+                                <p:cellEditor>
+                                    <f:facet name="output">
+                                        <h:outputText value="#{faturamento.dataVencimento}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                        </h:outputText>
+                                    </f:facet>
+                                    <f:facet name="input">
+                                        <p:calendar value="#{faturamento.dataVencimento}"
+                                                    navigator="true"
+                                                    readonlyInput="true"
+                                                    rendered="#{isFaturamentoAberto}"
+                                                    pattern="dd/MM/yyyy"
+                                                    locale="#{loginBean.locale}"
+                                                    mindate="#{faturamento.fim}"
+                                                    mask="true"/>
+                                    </f:facet>
+                                </p:cellEditor>
+
+                            </p:column>
+                            <p:column headerText="#{m.periodoDasConsultas}">
+                                <h:outputText value="#{faturamento.inicio}">
+                                    <f:convertDateTime pattern="dd/MMM/yy" locale="#{loginBean.locale}"/>
+                                </h:outputText>
+                                -
+                                <h:outputText value="#{faturamento.fim}">
+                                    <f:convertDateTime pattern="dd/MMM/yy" locale="#{loginBean.locale}"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="#{m.convenio}">
+                                <h:outputText value="#{faturamento.convenio.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.total}">
+                                <h:outputText value="#{faturamento.valor}">
+                                    <f:convertNumber type="currency" currencySymbol="R$ "/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="#{m.editar}">
+                                <h:outputLink value="editar.xhtml" rendered="#{permissaoEditar}">
+                                    <f:param name="faturamentoId" value="#{faturamento.id}"/>
+                                    <f:param name="status" value="#{faturamentoListBean.statusFaturamentoEnum.status}"/>
+                                    <o:param name="inicio" value="#{faturamentoListBean.faturamento.inicio}"
+                                             converter="dateToStringDDMMYYYYConverter"/>
+                                    <o:param name="fim" value="#{faturamentoListBean.faturamento.fim}"
+                                             converter="dateToStringDDMMYYYYConverter"/>
+                                    <i class="fa fa-pencil"/>
+                                </h:outputLink>
+                            </p:column>
+                            <p:column headerText="#{m.deletar}"
+                                      rendered="#{faturamentoListBean.statusFaturamentoEnum.equals(StatusFaturamentoEnum.ABERTO) and permissaoDeletar}">
+                                <p:commandLink actionListener="#{faturamentoListBean.delete(faturamento)}"
+                                               update="dataTable">
+                                    <i class="fa fa-trash"/>
+                                    <p:confirm header="Tem certeza?"
+                                               message="Você esta prestes a excluir esse faturamento, confirma?"
+                                               icon="ui-icon-alert"/>
+                                </p:commandLink>
+                            </p:column>
+                        </p:dataTable>
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group" id="gridBtnRemover">
+                            <p:commandButton value="#{m.fecharFaturamentosSelecionados}" rendered="#{faturamentoListBean.statusFaturamentoEnum.equals(StatusFaturamentoEnum.ABERTO) and permissaoFechar}"
+                                             actionListener="#{faturamentoListBean.closeFaturamento}"
+                                             update="dataTable" style="background-color: red"/>
+                        </p:panelGrid>
+                    </div>
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                  oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 5000)"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="#{m.sim}" type="button" styleClass="ui-confirmdialog-yes"
+                                         icon="ui-icon-check"/>
+                        <p:commandButton value="#{m.nao}" type="button" styleClass="ui-confirmdialog-no"
+                                         icon="ui-icon-close"/>
+                    </p:confirmDialog>
+                </h:form>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

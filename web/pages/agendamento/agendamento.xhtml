@@ -1,0 +1,341 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui" xmlns:of="http://omnifaces.org/functions"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:df="http://br.com.devdojo/functions"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+    <ui:define name="title">#{m.agendamento}</ui:define>
+    <f:metadata>
+        <f:viewParam name="consultorioId" value="#{agendamentoListBean.consultorioId}"/>
+        <f:viewParam name="especialidadeId" value="#{agendamentoListBean.especialidadeId}"/>
+        <f:viewParam name="agendaId" value="#{agendamentoListBean.agendaId}"/>
+        <f:viewParam name="especialistaId" value="#{agendamentoListBean.especialistaId}"/>
+        <f:viewParam name="dataBuscaInicio" value="#{agendamentoListBean.dataBuscaInicio}"
+                     converter="dateToStringDDMMYYYYConverter"/>
+        <f:viewParam name="dataBuscaFim" value="#{agendamentoListBean.dataBuscaFim}"
+                     converter="dateToStringDDMMYYYYConverter"/>
+        <f:viewAction action="#{agendamentoListBean.init}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <h:panelGroup id="script">
+            <script type="text/javascript">var enabledDays = eval(#{agendamentoListBean.diasLiberados});</script>
+        </h:panelGroup>
+        <c:set value="EEEEEEEE, dd 'de' MMMM 'de' yyyy" var="diaPattern"/>
+        <c:set value="#{!loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('editar') and !loginBean.admin}" var="permissaoEditar"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('cadastrar') or loginBean.admin}" var="permissaoCadastrar"/>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.agendamento}" url="#" styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <!--
+                <p:socket channel="/notifyOpen">
+                    <p:ajax event="message" update="form-dataTable" global="false"/>
+                </p:socket>
+                <p:socket channel="/notifyClose">
+                    <p:ajax event="message" update="form-dataTable" listener="#{agendamentoListBean.updateTableSocket}"
+                            global="false"/>
+                </p:socket>
+                !-->
+
+                <o:form id="form" includeRequestParams="true">
+                    <div class="card">
+                        <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:selectOneMenu value="#{agendamentoListBean.consultorio}" converter="entityConverter">
+                                <f:selectItems value="#{loginBean.consultorioEspecialistaEspecialidadeMap.keySet()}"
+                                               var="key"
+                                               itemValue="#{key}" itemLabel="#{key.nome}"/>
+                                <p:ajax listener="#{agendamentoListBean.clearFieldsAndLoadCombosEspecialidadesAndEspecialistas}"
+                                        update="@form inicio fim script"/>
+                            </p:selectOneMenu>
+                            <p:selectOneMenu id="especialidade" value="#{agendamentoListBean.especialidade}"
+                                             converter="entityConverter" filter="true" filterMatchMode="startsWith">
+                                <f:selectItem itemValue="#{null}" itemLabel="-- Todas especialidades -- "/>
+                                <f:selectItems var="especialidade" itemValue="#{especialidade}"
+                                               itemLabel="#{especialidade.especialidade}"
+                                               value="#{agendamentoListBean.especialidadeSet}"/>
+                                <p:ajax listener="#{agendamentoListBean.filterEspecialistaByEspecialidadeAndSearchAgendasDisponiveis}"
+                                        update="@form inicio fim script"/>
+                            </p:selectOneMenu>
+                            <p:selectOneMenu id="especialista" value="#{agendamentoListBean.especialista}"
+                                             converter="entityConverter" filter="true" filterMatchMode="startsWith">
+                                <f:selectItems var="especialistas" itemValue="#{especialistas.especialista}"
+                                               itemLabel="#{especialistas.especialista.nome}"
+                                               value="#{agendamentoListBean.especialistaDTOSet}"/>
+                                <p:ajax listener="#{agendamentoListBean.clearAgendaHorarioList}"
+                                        update="@form inicio fim script"/>
+                            </p:selectOneMenu>
+
+                        </p:panelGrid>
+                        <p:panelGrid columns="4" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:calendar value="#{agendamentoListBean.dataInicio}"
+                                        placeholder="#{m.dataInicio}" navigator="true"
+                                        pattern="dd/MM/yyyy"
+                                        mask="true"
+                                        id="inicio"
+                                        locale="#{loginBean.locale}" mode="inline"
+                                        beforeShowDay="enableAllTheseDays">
+                                <p:ajax event="dateSelect" update="fim dataTablePg"
+                                        listener="#{agendamentoListBean.onSelectDataInicio}"/>
+                            </p:calendar>
+
+                            <p:calendar value="#{agendamentoListBean.dataFim}"
+                                        id="fim"
+                                        mindate="#{agendamentoListBean.dataInicio}"
+                                        placeholder="#{m.dataFim}" navigator="true"
+                                        pattern="dd/MM/yyyy"
+                                        mask="true"
+                                        style="display: none"
+                                        locale="#{loginBean.locale}" mode="inline"
+                                        beforeShowDay="enableAllTheseDays"/>
+                        </p:panelGrid>
+
+                    </div>
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                        <h:panelGroup id="dataTablePg">
+                            <p:dataTable id="dataTable" value="#{agendamentoListBean.agendaHorariosList}"
+                                         rendered="#{agendamentoListBean.agendaHorariosList != null and !agendamentoListBean.agendaHorariosList.isEmpty()}"
+                                         var="agendaHorario"
+                                         widgetVar="agendamentoTable"
+                                         reflow="true"
+                                         expandableRowGroups="true"
+                                         sortBy="#{agendaHorario.dia}"
+                                         tableStyle="text-align: center; table-layout: auto">
+                                <c:set var="hasPaciente" value="#{agendaHorario.consulta != null}"/>
+                                <c:set var="dateHeaderModal"
+                                       value="#{of:formatDate(agendaHorario.diaInicio, diaPattern)} #{df:formatTwoDates(agendaHorario.diaInicio,agendaHorario.diaFim, 'HH:mm')}"/>
+
+                                <f:facet name="header">
+                                    <h:outputText value="#{m.horarios}"/>
+                                </f:facet>
+                                <!-- Agrupamento das linhas-->
+                                <p:headerRow>
+                                    <p:column colspan="7" style="text-align: left; font-weight: bolder">
+                                        <h:outputText value="#{of:formatDate(agendaHorario.dia,diaPattern)}"/>
+                                    </p:column>
+                                </p:headerRow>
+
+                                <p:column headerText="">
+                                    <h:outputText
+                                            value="#{of:formatDate(agendaHorario.diaInicio,'HH:mm')}"/>
+                                </p:column>
+
+                                <p:column headerText="#{m.paciente}">
+                                    <h:outputText
+                                            value="#{df:capitalize(agendaHorario.consulta.paciente.usuario.nome)}"/>
+                                </p:column>
+
+
+                                <p:column headerText="#{m.status}">
+                                    <h:outputText value="#{agendaHorario.consulta.status.nome.toUpperCase()}"/>
+                                </p:column>
+
+                                <p:column headerText="#{m.agendadoPor}">
+                                    <h:outputText value="#{agendaHorario.consulta.perfil.nome}"/>
+                                </p:column>
+                                <p:column>
+                                    <p:commandButton update="form-dataTable dialogAgenda" rendered="#{hasPaciente}"
+                                                     oncomplete="PF('dlg').show()"
+                                                     icon="ui-icon-pencil" title="Edit" process="@this"
+                                                     actionListener="#{agendamentoListBean.onOpenDialogAgenda(agendaHorario, agendaHorario.consulta, agendaHorario.agenda)}"
+                                                     disabled="#{applicationBean.agendaHorariosInUse.contains(agendaHorario) or agendaHorario.dia lt agendamentoListBean.now
+                                                     or permissaoEditar}">
+                                        <f:setPropertyActionListener
+                                                value="#{agendaHorario.consulta.paciente.usuario.nome}: #{dateHeaderModal}"
+                                                target="#{agendamentoListBean.headerModal}"/>
+                                    </p:commandButton>
+                                </p:column>
+                                <p:column>
+                                    <p:commandButton update="form-dataTable dialogPaciente" rendered="#{hasPaciente}"
+                                                     oncomplete="PF('dlgPaciente').show()"
+                                                     icon="ui-icon-search" title="Ver" process="@this"
+                                                     actionListener="#{agendamentoListBean.onOpenDialogPaciente(agendaHorario.consulta)}">
+                                        <f:setPropertyActionListener
+                                                value="#{agendaHorario.consulta.paciente.usuario.nome}: #{dateHeaderModal}"
+                                                target="#{agendamentoListBean.headerModal}"/>
+                                    </p:commandButton>
+                                </p:column>
+                                <p:column>
+                                    <h:outputLink value="../consulta/criar" rendered="#{agendaHorario.dia ge agendamentoListBean.now and permissaoCadastrar}">
+                                        <f:param name="consultorioId" value="#{agendamentoListBean.consultorio.id}"/>
+                                        <f:param name="especialidadeId"
+                                                 value="#{agendamentoListBean.especialidade != null ? agendamentoListBean.especialidade.id : 0}"/>
+                                        <f:param name="especialistaId" value="#{agendamentoListBean.especialista.id}"/>
+                                        <f:param name="agendaId" value="#{agendaHorario.agenda.id}"/>
+                                        <o:param name="dataBuscaInicio" value="#{agendamentoListBean.dataInicio}"
+                                                 converter="dateToStringDDMMYYYYConverter"/>
+                                        <o:param name="dataBuscaFim" value="#{agendamentoListBean.dataFim}"
+                                                 converter="dateToStringDDMMYYYYConverter"/>
+                                        <o:param name="diaHoraInicio" value="#{agendaHorario.diaInicio}"
+                                                 converter="dateToStringYYYMMDDHHMMConverter"/>
+                                        <o:param name="diaHoraFim" value="#{agendaHorario.diaFim}"
+                                                 converter="dateToStringYYYMMDDHHMMConverter"/>
+                                        <i class="fa fa-plus-circle"/>
+                                    </h:outputLink>
+                                </p:column>
+                            </p:dataTable>
+                        </h:panelGroup>
+                    </div>
+
+                    <div class="card">
+                        <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <!--<p:button value="#{m.cancelar}" outcome="/pages/especialista/especialista"/>-->
+                        </p:panelGrid>
+                    </div>
+
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                  oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 10000)"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                </o:form>
+                <p:dialog header="#{agendamentoListBean.headerModal}" id="dialogAgenda" widgetVar="dlg" modal="true"
+                          resizable="false" dynamic="true" width="300" focus="form2-horario">
+                    <p:ajax event="close" listener="#{agendamentoListBean.onCloseDialogAgenda}"/>
+                    <h:form id="form2">
+                        <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:messages id="messages2" showDetail="false" autoUpdate="true" closable="true"/>
+                            <h:outputLabel for="dia" value="#{m.dia}"/>
+                            <p:selectOneMenu value="#{agendamentoListBean.agenda}" id="dia" converter="entityConverter">
+                                <f:selectItems var="agenda" value="#{agendamentoListBean.agendaList}"
+                                               itemLabel="#{of:formatDate(agenda.dataInicio, diaPattern)}"
+                                               itemValue="#{agenda}"/>
+                                <p:ajax event="change" listener="#{agendamentoListBean.onChangeAgendaDialog}"
+                                        process="@this" update="horario"/>
+                            </p:selectOneMenu>
+
+                            <h:outputLabel for="horario" value="#{m.horarios}"/>
+                            <p:selectOneMenu value="#{agendamentoListBean.novaAgendaHorario}" id="horario"
+                                             required="true" converter="searchDTOConverter"
+                                             requiredMessage="Selecione um novo horário">
+                                <f:selectItems var="search" value="#{agendamentoListBean.agendaHorariosModalList}"
+                                               itemLabel="#{of:formatDate(search.diaInicio, 'HH:mm')} - #{of:formatDate(search.diaFim, 'HH:mm')}"
+                                               itemValue="#{search}"/>
+                                <p:ajax event="change" process="@this" immediate="true"/>
+                            </p:selectOneMenu>
+                        </p:panelGrid>
+                        <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:button value="#{m.fechar}"
+                                      update="form-dataTablePg" onclick="PF('dlg').hide();return false;"/>
+                            <p:commandButton value="#{m.atualizar}" actionListener="#{agendamentoListBean.update}"
+                                             update="form-dataTablePg" oncomplete="PF('dlg').hide()"/>
+                            <p:commandButton value="#{m.cancelar}" style="background-color: red" actionListener="#{agendamentoListBean.desmarcar}"
+                                             update="form-dataTablePg" oncomplete="PF('dlg').hide()">
+                                <p:confirm header="#{m.desejaDesmarcarConsulta}"
+                                message="#{m.confirmaEstaAcao}"
+                                icon="ui-icon-alert"/>
+                            </p:commandButton>
+                        </p:panelGrid>
+                        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                            <p:commandButton value="#{m.sim}" type="button" styleClass="ui-confirmdialog-yes"
+                                             icon="ui-icon-check"/>
+                            <p:commandButton value="#{m.nao}" type="button" styleClass="ui-confirmdialog-no"
+                                             icon="ui-icon-close"/>
+                        </p:confirmDialog>
+                    </h:form>
+
+                </p:dialog>
+
+                <p:dialog header="#{agendamentoListBean.headerModal}" id="dialogPaciente" widgetVar="dlgPaciente"
+                          modal="true"
+                          resizable="false" dynamic="true" width="300" focus="form2-horario">
+                    <p:ajax event="close" listener="#{agendamentoListBean.onCloseDialogPaciente}"/>
+                    <h:form id="form3">
+                        <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:outputLabel value="#{agendamentoListBean.consultaPacienteEditing.paciente.usuario.nome}"
+                                           style="font-weight: bolder"/>
+                            <h:outputText value=""/>
+                            <p:outputLabel value="#{m.convenio}" style="font-weight: bolder"/>
+                            <h:outputText value="#{agendamentoListBean.consultaPacienteEditing.convenio.nome}"/>
+                            <p:outputLabel value="#{m.telefone}" style="font-weight: bolder"/>
+                            <h:outputText
+                                    value="#{agendamentoListBean.consultaPacienteEditing.paciente.usuario.telefoneResidencia}"/>
+                            <p:outputLabel value="#{m.celular}" style="font-weight: bolder"/>
+                            <h:outputText
+                                    value="#{agendamentoListBean.consultaPacienteEditing.paciente.usuario.celular}"/>
+                        </p:panelGrid>
+                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:button value="#{m.fechar}"
+                                      update="form-dataTablePg" onclick="PF('dlgPaciente').hide();return false;"/>
+                        </p:panelGrid>
+                    </h:form>
+                </p:dialog>
+            </div>
+        </div>
+
+        <!--
+                <h:form id="socketForm">
+                    <h:inputHidden id="agendaId" value="#{agendamentoListBean.agendaListString}" />
+                </h:form>
+
+                <h:outputScript name="js/socket.io.js" library="atlantis-layout" target="body"/>
+
+
+                <script type="text/javascript">
+                    //<![CDATA[
+                    function openSocket(){
+                        var socket = io.connect('https://murmuring-chamber-91453.herokuapp.com/');
+
+                        socket.on("agendandoToCancel",  function (horario, idAgenda, desabilitar) {
+
+                            var agendaId = document.getElementById("socketForm-agendaId").value;
+                            if (agendaId.indexOf(idAgenda) != -1 && desabilitar == false) {
+                                var aTags = document.getElementsByTagName("td");
+                                var searchText = horario.split("+")[1];
+                                searchText = searchText.replace(":00", "");
+                                var found;
+
+                                for (var i = 0; i < aTags.length; i++) {
+                                    if (aTags[i].textContent == searchText) {
+                                        found = aTags[i];
+                                        found.parentNode.style.backgroundColor = "white";
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+
+                        socket.on("agendandoTo",  function (horario, idAgenda, desabilitar) {
+
+                            var agendaId = document.getElementById("socketForm-agendaId").value;
+                            if (agendaId.indexOf(idAgenda) != -1 & desabilitar == true) {
+                                var aTags = document.getElementsByTagName("td");
+                                var searchText = horario.split("T")[1];
+                                searchText = searchText.replace(":00", "");
+                                var found;
+
+                                for (var i = 0; i < aTags.length; i++) {
+                                    if (aTags[i].textContent == searchText) {
+                                        found = aTags[i];
+                                        found.parentNode.style.backgroundColor = "indianred";
+                                        break;
+                                    }
+                                }
+                            }
+
+                            console.log("veio agendandoTO");
+                            console.log(horario +  idAgenda + desabilitar)
+                        });
+                        console.log(socket);
+                        return false;
+                    }
+                    //]]>
+                </script>
+                !-->
+        <h:outputScript name="js/disabledays.js" library="atlantis-layout" target="body"/>
+    </ui:define>
+</ui:composition>
+

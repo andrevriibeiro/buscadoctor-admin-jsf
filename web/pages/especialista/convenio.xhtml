@@ -1,0 +1,101 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.especialista}</ui:define>
+    <f:metadata>
+        <f:viewParam name="especialistaId" value="#{especialistaConvenioBean.especialistaId}"/>
+        <f:viewAction action="#{especialistaConvenioBean.init}"/>
+
+    </f:metadata>
+    <ui:define name="content">
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.especialista}" url="/pages/especialista/especialistashabilitados.xhtml"/>
+                        <p:menuitem value="#{m.convenio}" url="/pages/especialista/convenio.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h2>#{especialistaConvenioBean.especialista.nome}</h2>
+                <h:form>
+                    <p:tabMenu activeIndex="#{param.i}">
+                        <p:menuitem value="Especialista" outcome="/pages/especialista/editar"
+                                    icon="fa fa-fw fa-user-md">
+                            <f:param name="especialistaId" value="#{especialistaConvenioBean.especialistaId}"/>
+                        </p:menuitem>
+                        <p:menuitem value="#{m.convenios}" outcome="/pages/especialista/convenio"
+                                    icon="fa fa-fw fa-plus-square">
+                        </p:menuitem>
+                        <p:menuitem value="#{m.procedimentos}" outcome="/pages/especialista/procedimento"
+                                    icon="fa fa-fw fa-plus-square">
+                            <f:param name="i" value="2"/>
+                            <f:param name="especialistaId" value="#{especialistaConvenioBean.especialistaId}"/>
+                        </p:menuitem>
+                    </p:tabMenu>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <div class="card">
+                    <h:form id="form">
+                        <p:pickList id="PojoPickList" value="#{especialistaConvenioBean.dualConvenios}" var="theme"
+                                    effect="bounce"
+                                    itemValue="#{theme}" itemLabel="#{theme.nome}" showSourceControls="true"
+                                    showTargetControls="true" showCheckbox="true" responsive="true"
+                                    showSourceFilter="true" showTargetFilter="true"
+                                    converter="entityConverter" filterMatchMode="contains">
+
+                            <f:facet name="sourceCaption">Todos</f:facet>
+                            <f:facet name="targetCaption">Associados</f:facet>
+                            <p:ajax event="transfer" listener="#{especialistaConvenioBean.onTransfer}"/>
+                            <p:ajax event="select" listener="#{especialistaConvenioBean.onSelect}"/>
+                            <p:ajax event="unselect" listener="#{especialistaConvenioBean.onUnselect}"/>
+                            <p:ajax event="reorder" listener="#{especialistaConvenioBean.onReorder}"/>
+                            <p:column style="width:10%">
+                                <h:outputText styleClass="ui-theme ui-theme-#{theme.nome}"/>
+                            </p:column>
+
+                            <p:column style="width:90%;">
+                                <h:outputText value="#{theme.nome}"/>
+                            </p:column>
+                        </p:pickList>
+                        <br/>
+                        <p:panelGrid columns="3" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                            <p:button value="#{m.cancelar}" outcome="/pages/especialista/especialistashabilitados.xhtml"/>
+
+                            <p:commandButton value="#{m.atualizar}" id="atualizar"
+                                             action="#{especialistaConvenioBean.updateConvenioEspecialista()}"
+                                             update="form"/>
+                        </p:panelGrid>
+                        <p:messages id="message" showDetail="true" autoUpdate="true" closable="true"/>
+
+                        <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                      oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 5000)"/>
+                        <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+                        <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false"
+                                  resizable="false"
+                                  showHeader="false">
+                            <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                        </p:dialog>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

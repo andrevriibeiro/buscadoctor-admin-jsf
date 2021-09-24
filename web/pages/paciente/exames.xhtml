@@ -1,0 +1,49 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.examesPaciente}</ui:define>
+
+    <ui:define name="content">
+        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.paciente}" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.editarPaciente}" url="/pages/paciente/editar.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form>
+                    <p:tabMenu activeIndex="#{param.i}">
+                        <p:menuitem value="Perfil do Paciente" outcome="/pages/paciente/editar" icon="fa fa-fw fa-user">
+                            <f:param name="i" value="0" />
+                        </p:menuitem>
+                        <p:menuitem value="Consultas do Paciente" outcome="/pages/paciente/consultas" icon="ui-icon-calendar">
+                            <f:param name="i" value="1" />
+                        </p:menuitem>
+                        <p:menuitem value="Prontuário" outcome="/pages/paciente/prontuarios" icon="ui-icon-clipboard">
+                            <f:param name="i" value="2" />
+                        </p:menuitem>
+                        <p:menuitem value="Imagens e Videos" outcome="/pages/paciente/exames" icon="ui-icon-image">
+                            <f:param name="i" value="3" />
+                        </p:menuitem>
+                    </p:tabMenu>
+                </h:form>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

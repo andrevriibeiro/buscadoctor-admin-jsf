@@ -1,0 +1,74 @@
+.layout-side-menu {
+  width: 180px;
+  position: fixed;
+  height: 100%;
+  background-color: #efefef;
+  margin-right: 200px !important;
+  display: block;
+}
+
+@media (max-width:1024px) {
+  .layout-main-content {
+    margin-left: 175px !important;
+  }
+}
+
+.layout-wrapper .layout-sidebar-responsive {
+  background-color: #545b61;
+  display: none;
+}
+
+@media (max-width:640px) {
+  .layout-main-content {
+    margin-left: 0px !important;
+  }
+  .layout-side-menu {
+    display: none;
+  }
+  .layout-wrapper .layout-sidebar-responsive {
+    display: block;}
+}
+
+body .ui-panelmenu .ui-panelmenu-header a {
+  font-size: 14px;
+}
+
+body .layout-side-menu .ui-menu {
+
+  background-color: #efefef;
+  border: none;
+  width: 14.0em;
+}
+
+.topbar-badge animated rubberBand {
+  padding : 2px 4px !important;
+  position : absolute !important;
+  right : -5px !important;
+  top : -5px !important;
+  background-color : #e42a7b !important;
+  font-size : 12px !important;
+  color : #ffffff !important;
+  line-height : 12px !important;
+}
+
+.topbar-icon fa fa-fw fa-bell-o {
+  font-size : 28px !important;
+  color : white !important;
+}
+
+
+.ui-g-12 ui-md-6 ui-lg-8 {
+  margin-left: 200px;
+}
+
+.blackFont {
+  color: black;
+}
+
+.layout-main-content {
+  margin-left: 138px !important;
+}
+.valorTotalOut {
+  font-weight:bold;
+  color: #0c6351;
+}

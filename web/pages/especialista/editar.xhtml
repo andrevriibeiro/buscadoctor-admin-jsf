@@ -1,0 +1,261 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.cadastrarEspecialista}</ui:define>
+
+    <ui:define name="content">
+        <f:metadata>
+            <f:viewParam name="especialistaId" value="#{especialistaBean.especialistaId}"/>
+            <f:viewAction action="#{especialistaBean.init()}"/>
+        </f:metadata>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.especialistas}" url="/pages/especialista/especialistashabilitados.xhtml"/>
+                        <p:menuitem value="#{m.editar}" url="/pages/especialista/editar.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form>
+                    <h2>#{especialistaBean.especialistaConsultorio.especialista.nome}</h2>
+                    <p:tabMenu activeIndex="#{param.i}">
+                        <p:menuitem value="#{m.especialista}" outcome="/pages/especialista/editar"
+                                    icon="fa fa-fw fa-user-md">
+                            <f:param name="i" value="0"/>
+                            <f:param name="especialistaId" value="#{especialistaBean.especialistaId}"/>
+                        </p:menuitem>
+                        <p:menuitem value="#{m.convenios}" outcome="/pages/especialista/convenio"
+                                    icon="fa fa-fw fa-plus-square">
+                            <f:param name="i" value="1"/>
+                            <f:param name="especialistaId" value="#{especialistaBean.especialistaId}"/>
+                        </p:menuitem>
+                        <p:menuitem value="#{m.procedimentos}" outcome="/pages/especialista/procedimento"
+                                    icon="fa fa-fw fa-plus-square">
+                            <f:param name="i" value="2"/>
+                            <f:param name="especialistaId" value="#{especialistaBean.especialistaId}"/>
+                        </p:menuitem>
+                    </p:tabMenu>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="form">
+                    <div class="card card-w-title">
+                        <h1>Editar especialista</h1>
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                            <p:outputLabel value="CRM" for="crm"/>
+                            <p:inputText value="#{especialistaBean.especialistaConsultorio.especialista.crm}" id="crm"
+                                         placeholder="CRM" required="true" readonly="true">
+                                <f:ajax event="blur"/>
+                            </p:inputText>
+                            <p:outputLabel value="Nome" for="nome"/>
+                            <p:inputText value="#{especialistaBean.especialistaConsultorio.especialista.nome}" id="nome"
+                                         placeholder="Nome" required="true">
+                                <f:ajax event="blur"/>
+                            </p:inputText>
+                        </p:panelGrid>
+
+                        <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                            <p:outputLabel value="Especialista Trabalha nos Feriados?" for="atende"/>
+                            <p:selectOneRadio id="atende"
+                                              value="#{especialistaBean.especialistaConsultorio.trabalhaferiado}"
+                                              required="true"
+                                              requiredMessage="#{m.requiredSexo}">
+                                <f:selectItem itemLabel="Sim" itemValue="true"/>
+                                <f:selectItem itemLabel="Não" itemValue="false"/>
+                                <p:ajax event="click"/>
+                            </p:selectOneRadio>
+                        </p:panelGrid>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="form2">
+                    <div class="card card-w-title">
+                        <p:messages id="especEspecialidade" showDetail="true" autoUpdate="true" closable="true"/>
+                        <h3>#{m.addEspecialidade}</h3>
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group" style="height:90%">
+                            <p:outputLabel value="#{m.especialidades}" for="especialistaEspec"/>
+                            <p:selectOneMenu id="especialistaEspec" filter="true" filterMatchMode="startsWith"
+                                             value="#{especialistaBean.newEspecialidade}"
+                                             converter="entityConverter" style="width:220px">
+                                <f:selectItem value="#{null}" itemLabel="Selecione uma Especialidade"/>
+                                <f:selectItems var="especialidadesSelect" itemValue="#{especialidadesSelect}"
+                                               itemLabel="#{especialidadesSelect.especialidade}"
+
+                                               value="#{especialistaBean.especialidades}"/>
+                            </p:selectOneMenu>
+                            <p:commandButton value="#{m.addEspecialidade}"
+                                             actionListener="#{especialistaBean.addEspecialidadeAndRemoveFromDropdown}"
+                                             update="form2">
+                            </p:commandButton>
+                        </p:panelGrid>
+                    </div>
+                    <div class="card">
+                        <p:dataTable id="dataTable" var="especialistaEspecialidade"
+                                     value="#{especialistaBean.especialistaEspecialidadeList}"
+                                     rowKey="#{especialistaEspecialidade.especialidade.especialidade}"
+                                     disabledSelection="#{especialistaEspecialidade.principal}"
+                                     selection="#{especialistaBean.especialidadeSelectedList}"
+                                     paginator="true"
+                                     rows="5"
+                                     paginatorPosition="bottom"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <f:facet name="header">
+                                <h:outputText value="#{m.especialidades}"/>
+                            </f:facet>
+                            <p:column selectionMode="multiple"/>
+                            <p:column headerText="Especialidade">
+                                <h:outputText value="#{especialistaEspecialidade.especialidade.especialidade}"/>
+                            </p:column>
+                            <p:column headerText="#{m.principalEspecialidade}">
+                                <p:inputSwitch onLabel="Sim" offLabel="Não"
+                                               value="#{especialistaEspecialidade.principal}"
+                                               disabled="#{especialistaEspecialidade.principal}">
+                                    <p:ajax listener="#{especialistaBean.changeEspecialidadeprincipal(especialistaEspecialidade)}"
+                                            update="form2"/>
+                                </p:inputSwitch>
+                            </p:column>
+                        </p:dataTable>
+
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group">
+                        <p:commandButton value="#{m.removerEspecialidade}"
+                                         actionListener="#{especialistaBean.removeEspecialidadeAndAddToDropdown}"
+                                         style="background-color: red" partialSubmit="true"
+                                         update="dataTable" process="@this dataTable">
+                        </p:commandButton>
+                    </p:panelGrid>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="form3">
+                    <div class="card">
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                            <p:outputLabel value="#{m.razaoSocial}" for="razao"/>
+                            <p:inputText value="#{especialistaBean.especialistaConsultorio.especialista.razaoSocial}"
+                                         id="razao" placeholder="#{m.razaoSocial}"/>
+
+                            <p:outputLabel value="Sexo" for="sexo"/>
+                            <p:selectOneMenu id="sexo"
+                                             value="#{especialistaBean.especialistaConsultorio.especialista.sexo}"
+                                             required="true"
+                                             requiredMessage="#{m.requiredSexo}">
+                                <f:selectItem itemLabel="Opção" value="#{null}"/>
+                                <f:selectItem itemLabel="Masculino" itemValue="masculino"/>
+                                <f:selectItem itemLabel="Feminino" itemValue="feminino"/>
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="E-mail" for="email"/>
+                            <p:inputText value="#{especialistaBean.especialistaConsultorio.especialista.email}"
+                                         id="email" placeholder="E-mail"/>
+
+                            <p:outputLabel value="CPF" for="cpf"/>
+                            <p:inputMask value="#{especialistaBean.especialistaConsultorio.especialista.cpf}" id="cpf"
+                                         placeholder="CPF"
+                                         mask="999.999.999-99"/>
+
+                            <p:outputLabel value="RG" for="rg"/>
+                            <p:inputText value="#{especialistaBean.especialistaConsultorio.especialista.cnpj}"
+                                         id="rg" placeholder="RG"/>
+
+                            <p:outputLabel value="Celular" for="celular"/>
+                            <p:inputMask value="#{especialistaBean.especialistaConsultorio.especialista.celular}"
+                                         id="celular"
+                                         placeholder="Celular" mask="(99)99999-9999"/>
+
+                            <p:outputLabel value="Telefone residencial" for="telefone"/>
+                            <p:inputMask
+                                    value="#{especialistaBean.especialistaConsultorio.especialista.telefoneResidencia}"
+                                    id="telefone" placeholder="Telefone" mask="(99)9999-9999"/>
+                        </p:panelGrid>
+
+                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                     style="width: 60%">
+                            <p:inputMask value="#{especialistaBean.especialistaConsultorio.especialista.logradouro.cep}"
+                                         id="cep"
+                                         placeholder="CEP"
+                                         mask="99999-999"/>
+                            <p:commandButton value="#{m.buscarCep}"
+                                             action="#{especialistaBean.findCep}"
+                                             update="tipoLogradouro logradouro bairro cid estado">
+                            </p:commandButton>
+                        </p:panelGrid>
+
+                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                     style="width: 60%">
+                            <p:inputText id="tipoLogradouro" disabled="true" placeholder="Tipo do Logradouro"
+                                         value="#{especialistaBean.especialistaConsultorio.especialista.logradouro.tipo}"/>
+                            <p:inputText id="logradouro" readonly="true" placeholder="Logradouro"
+                                         value="#{especialistaBean.especialistaConsultorio.especialista.logradouro.nome}"/>
+                        </p:panelGrid>
+
+                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                     style="width: 60%">
+                            <p:inputText id="numero" placeholder="numero"
+                                         value="#{especialistaBean.especialistaConsultorio.especialista.numero}">
+                                <f:convertNumber integerOnly="true" groupingUsed="false"/>
+                            </p:inputText>
+
+                            <p:inputText id="comp" placeholder="complemento"/>
+                        </p:panelGrid>
+
+                        <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+
+                            <p:inputText id="bairro" placeholder="bairro" readonly="true"
+                                         value="#{especialistaBean.especialistaConsultorio.especialista.logradouro.bairro}"/>
+
+                            <p:inputText id="cid" placeholder="cidade" readonly="true"
+                                         value="#{especialistaBean.especialistaConsultorio.especialista.logradouro.cidade.nome}"/>
+                        </p:panelGrid>
+
+                        <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                            <p:inputText id="estado" placeholder="estado" readonly="true"
+                                         value="#{especialistaBean.especialistaConsultorio.especialista.logradouro.cidade.estado.nome}"/>
+                        </p:panelGrid>
+
+                        <p:panelGrid columns="3" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                            <p:button value="#{m.cancelar}" outcome="/pages/especialista/especialistashabilitados.xhtml"/>
+                            <p:commandButton value="#{m.salvar}" action="#{especialistaBean.salvar}"/>
+                        </p:panelGrid>
+
+                        <br/>
+                        <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                      oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 5000)"/>
+                        <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+                        <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false"
+                                  resizable="false"
+                                  showHeader="false">
+                            <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                        </p:dialog>
+                        <p:messages id="msg" showDetail="true" autoUpdate="true" closable="true"/>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

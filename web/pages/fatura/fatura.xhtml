@@ -1,0 +1,126 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui" xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.faturas}</ui:define>
+
+    <ui:define name="content">
+        <f:metadata>
+            <f:viewParam name="status" value="#{faturaListBean.statusFaturaParam}"/>
+            <f:viewAction action="#{faturaListBean.init}"/>
+        </f:metadata>
+
+        <o:importConstants type="br.com.devdojo.projetoinicial.persistence.model.enums.StatusFaturaEnum"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('editar') or loginBean.admin}" var="permissaoEditar"/>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.faturas}" url="/pages/fatura/fatura.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form>
+                    <div class="card">
+                        <p:panelGrid columns="3" styleClass="ui-panelgrid-blank form-group" layout="grid">
+                            <p:selectOneMenu layout="responsive"
+                                             value="#{faturaListBean.statusFaturaEnum}"
+                                             required="true" id="estadoCivil">
+                                <f:selectItems value="#{StatusFaturaEnum}" var="status"
+                                               itemValue="#{status}" itemLabel="Status da fatura: #{status}"/>
+                                <p:ajax event="change" listener="#{faturaListBean.search()}" update="dataTable"/>
+                            </p:selectOneMenu>
+                            <p:calendar value="#{faturaListBean.inicio}"
+                                        id="inicio"
+                                        placeholder="#{m.dataInicio}" navigator="true"
+                                        pattern="dd/MM/yyyy"
+                                        mask="true" locale="#{loginBean.locale}"/>
+
+                            <p:calendar value="#{faturaListBean.fim}"
+                                        id="fim"
+                                        locale="#{loginBean.locale}"
+                                        placeholder="#{m.dataFim}" navigator="true" pattern="dd/MM/yyyy"
+                                        mask="true"/>
+                            <p:commandButton value="#{m.buscar}" actionListener="#{faturamentoListBean.search}"
+                                             update="dataTable"/>
+                        </p:panelGrid>
+                    </div>
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+
+                        <p:dataTable id="dataTable" var="fatura" value="#{faturaListBean.faturaList}"
+                                     rows="10"
+                                     paginator="true"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     paginatorPosition="bottom"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <f:facet name="header">
+                                <h:outputText value="#{m.faturas}"/>
+                            </f:facet>
+                            <p:column headerText="#{m.numerofatura}">
+                                <h:outputText value="#{fatura.numero}"/>
+                            </p:column>
+                            <p:column headerText="#{m.paciente}">
+                                <h:outputText value="#{fatura.paciente.usuario.nome}"/>
+                            </p:column>
+                            <p:column headerText="#{m.dataDaFatura}">
+                                <h:outputText value="#{fatura.createdAt}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="#{m.convenio}">
+                                <h:outputText value="#{fatura.convenio.nome}"/>
+                            </p:column>
+                            <p:column headerText="#{m.tipoDaFatura}">
+                                <h:outputText value="#{fatura.tipoFatura.tipo}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.status}">
+                                <h:outputText value="#{fatura.statusFatura.status}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.valor}">
+                                <h:outputText value="#{fatura.valor}">
+                                    <f:convertNumber type="currency" currencySymbol="R$ "/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="#{m.editar}">
+                                <h:outputLink value="editar.xhtml" rendered="#{permissaoEditar}">
+                                    <f:param name="faturaId" value="#{fatura.id}"/>
+                                    <i class="fa fa-pencil"/>
+                                </h:outputLink>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes"
+                                         icon="ui-icon-check"/>
+                        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no"
+                                         icon="ui-icon-close"/>
+                    </p:confirmDialog>
+                </h:form>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

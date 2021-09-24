@@ -1,0 +1,205 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.editarConsulta}</ui:define>
+
+    <ui:define name="content">
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('adicionar') or loginBean.admin}" var="permissaoAdicionarProcedimento"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('remover') or loginBean.admin}" var="permissaoRemoverProcedimento"/>
+        <f:metadata>
+            <f:viewParam name="consultaId" value="#{consultaEditBean.consultaId}"/>
+            <f:viewParam name="pacienteId" value="#{consultaEditBean.pacienteId}"/>
+            <f:viewAction action="#{consultaEditBean.init()}"/>
+        </f:metadata>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.paciente}" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.editarPaciente}" url="/pages/paciente/editar?pacienteId=#{consultaEditBean.pacienteId}"/>
+                        <p:menuitem value="#{m.editarConsulta}" url="/pages/paciente/editarConsulta.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <div class="card">
+                    <h:link value="#{m.listarConsultas}"
+                            outcome="#{consultaEditBean.consultasUrl}"/>
+                </div>
+                <div class="card">
+                    <p:panelGrid columns="6" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                        <p:outputLabel value="#{m.status}" for="statusConsulta" style="font-weight: bold"/>
+                        <h:outputText value="#{consultaEditBean.consulta.status.nome}"
+                                      id="statusConsulta"/>
+                        <p:outputLabel value="#{m.paciente}" for="paciente" style="font-weight: bold"/>
+                        <h:outputText value="#{consultaEditBean.consulta.paciente.usuario.nome}"
+                                      id="paciente"/>
+
+                        <p:outputLabel value="#{m.dataDaConsulta}" for="dataConsulta" style="font-weight: bold"/>
+                        <h:outputText value="#{consultaEditBean.consulta.horaInicio}"
+                                      id="dataConsulta">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+
+                        <p:outputLabel value="#{m.especialista}" for="especialista" style="font-weight: bold"/>
+                        <h:outputText
+                                value="#{consultaEditBean.consulta.agenda.especialista.nome}"
+                                id="especialista"/>
+
+                        <p:outputLabel value="#{m.especialidade}" for="especialidade" style="font-weight: bold"/>
+                        <h:outputText
+                                value="#{consultaEditBean.consulta.especialidade.especialidade}"
+                                id="especialidade"/>
+                        <p:outputLabel value="#{m.convenio}" for="especialidade" style="font-weight: bold"/>
+                        <h:outputText
+                                value="#{consultaEditBean.consulta.convenio.nome}"
+                                id="convenio"/>
+                    </p:panelGrid>
+                </div>
+                <h:form id="form">
+
+                    <div class="card">
+                        <h3>#{m.adicionarNovoProcedimento}</h3>
+                        <p:panelGrid columns="2" layout="grid" columnClasses="ui-grid-col-2,ui-grid-col-5"
+                                     styleClass="ui-panelgrid-blank form-group">
+                            <h:outputLabel value="#{m.procedimento}" for="procedimentos"/>
+                            <p:selectOneMenu id="procedimentos"
+                                             value="#{consultaEditBean.newFaturaProcedimento.procedimentoEspecialista}"
+                                             required="true" requiredMessage="Um procedimento é necessário"
+                                             converter="entityConverter">
+                                <f:selectItem value="#{null}"
+                                              itemLabel="Selecione um novo procedimento a ser adicionado"/>
+                                <f:selectItems value="#{consultaEditBean.procedimentoEspecialistaList}"
+                                               var="procedimentoEspecialista"
+                                               itemValue="#{procedimentoEspecialista}"
+                                               itemLabel="#{procedimentoEspecialista.procedimentoConvenio.procedimento.nome}"/>
+                            </p:selectOneMenu>
+                            <h:outputLabel value="#{m.qtde}" for="qtde"/>
+                            <p:inputText id="qtde" value="#{consultaEditBean.newFaturaProcedimento.quantidade}"
+                                         validator="#{validatorBean.validateQuantidadeProcedimento}"
+                                         onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"
+                                         style="width: 30%"/>
+                            <h:outputLabel value="#{m.numeroDaGuia}" for="guia"/>
+                            <p:inputText id="guia" value="#{consultaEditBean.newFaturaProcedimento.guia}"
+                                         onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"
+                                         style="width: 30%"/>
+                            <p:commandButton value="#{m.adicionarNovoProcedimento}" rendered="#{permissaoAdicionarProcedimento}"
+                                             actionListener="#{consultaEditBean.addFaturaProcedimento}"
+                                             update="form2-dataTable @form"/>
+                        </p:panelGrid>
+                    </div>
+                </h:form>
+                <h:form id="form2">
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                        <p:remoteCommand name="onCellEdit" process="@this" update="dataTable" ignoreAutoUpdate="true"/>
+
+                        <p:dataTable value="#{consultaEditBean.faturaProcedimentoList}" var="faturaProcedimento"
+                                     reflow="true" resizableColumns="true"
+                                     rowKey="#{faturaProcedimento.id}"
+                                     id="dataTable"
+                                     editable="true" editMode="cell"
+                                     selection="#{consultaEditBean.faturaProcedimentoSelectedList}"
+                                     tableStyle="table-layout: auto; text-align: center"
+                                     disabledSelection="#{consultaEditBean.faturaProcedimentoList.size() == 0}"
+                                     sortBy="#{consultaEditBean.faturaProcedimento.procedimentoEspecialista.procedimentoConvenio.valor}">
+                            <p:ajax event="cellEdit" update="dataTable" oncomplete="onCellEdit();"/>
+                            <p:column selectionMode="multiple"/>
+                            <f:facet name="header">
+                                <h:outputText value="#{m.procedimentos}"/>
+                            </f:facet>
+                            <p:column headerText="#{m.numeroDaGuia}">
+                                <p:cellEditor>
+                                    <f:facet name="output">
+                                        <h:outputText value="#{faturaProcedimento.guia}"/>
+                                    </f:facet>
+                                    <f:facet name="input">
+                                        <p:inputText id="numeroFaturamento"
+                                                     value="#{faturaProcedimento.guia}"
+                                                     onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"/>
+                                    </f:facet>
+                                </p:cellEditor>
+                            </p:column>
+                            <p:column headerText="#{m.tipo}">
+                                <h:outputText
+                                        value="#{faturaProcedimento.fatura.tipoFatura.tipo}"/>
+                            </p:column>
+                            <p:column headerText="#{m.procedimento}">
+                                <h:outputText
+                                        value="#{faturaProcedimento.procedimentoEspecialista.procedimentoConvenio.procedimento.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.qtde}">
+                                <p:cellEditor>
+                                    <f:facet name="output"> <h:outputText
+                                            value="#{faturaProcedimento.quantidade}"/></f:facet>
+                                    <f:facet name="input"><p:inputText value="#{faturaProcedimento.quantidade}"
+                                                                       onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"/></f:facet>
+                                </p:cellEditor>
+                            </p:column>
+
+                            <p:column headerText="#{m.total}">
+                                <h:outputText
+                                        value="#{faturaProcedimento.quantidade * faturaProcedimento.procedimentoEspecialista.procedimentoConvenio.valor}">
+                                    <f:convertNumber type="currency" currencySymbol="R$ "/>
+                                </h:outputText>
+                            </p:column>
+                            <p:summaryRow>
+                                <p:column colspan="6" style="text-align:right;">
+                                    <h:outputText
+                                            value="#{consultaEditBean.faturaProcedimentoList.stream().map(fp -> fp.quantidade * fp.procedimentoEspecialista.procedimentoConvenio.valor).sum()}">
+                                        <f:convertNumber type="currency" currencySymbol="Total R$ "/>
+                                    </h:outputText>
+                                </p:column>
+                            </p:summaryRow>
+                        </p:dataTable>
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group">
+                            <p:commandButton value="#{m.removerProcedimentosSelecionado}" rendered="#{permissaoRemoverProcedimento}"
+                                             actionListener="#{consultaEditBean.removeProcedimentoFromFatura}"
+                                             update="dataTable" style="background-color: red"/>
+                        </p:panelGrid>
+                    </div>
+
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                  oncomplete="setTimeout(function() { $('.ui-messages-error').slideUp(); }, 5000)"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="#{m.sim}" type="button" styleClass="ui-confirmdialog-yes"
+                                         icon="ui-icon-check"/>
+                        <p:commandButton value="#{m.nao}" type="button" styleClass="ui-confirmdialog-no"
+                                         icon="ui-icon-close"/>
+                    </p:confirmDialog>
+
+
+                    <div class="card">
+                        <div class="card-w-title">
+                            <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+
+                                <p:button value="#{m.cancelar}"
+                                          href="#{consultaEditBean.consultasUrl}"/>
+
+                                <p:commandButton value="#{m.atualizar}" action="#{consultaEditBean.update}"/>
+
+
+                            </p:panelGrid>
+                        </div>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

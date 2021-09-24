@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <h:head>
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="apple-mobile-web-app-capable" content="yes"/>
+            <link href="../icon/favicon.ico" rel="shortcut icon"/>
+            <link rel="shortcut icon" type="image/x-icon" href="/images/icon/favicon.ico"/>
+        </f:facet>
+        <title>Busca Doctor - Facilitando suas consultas</title>
+    </h:head>
+
+    <h:body styleClass="login-body">
+
+        <div class="login-panel ui-fluid">
+            <div class="ui-g">
+                <h:form id="form">
+                    <div class="ui-g-12 logo-container">
+                        <p:graphicImage name="images/logo-transparente.png" styleClass="logoImg" library="atlantis-layout"/>
+                        <h1><h:outputText value="#{m.loginToYourAccount}"/></h1>
+                        <h2><h:outputText value="#{m.welcomeBuscaDoctor}"/></h2>
+                    </div>
+
+                    <div class="ui-g-12">
+                        <p:messages id="messages" showDetail="false" autoUpdate="true" closable="true"/>
+                        <p:inputText id="login" placeholder="Usuário" value="#{loginBean.perfil.user}" required="true" requiredMessage="#{m.errorRequired}"/>
+                        <p:message for="login" display="text"/>
+                    </div>
+                    <div class="ui-g-12">
+                        <p:password id="password" placeholder="Senha" value="#{loginBean.perfil.senha}" feedback="false" required="true" requiredMessage="#{m.errorRequired}"/>
+                        <p:message for="password" display="text"/>
+
+                    </div>
+                    <div class="ui-g-12 button-container">
+                        <p:commandButton icon="fa fa-user" action="#{loginBean.logar}" styleClass="green-btn" value="#{m.signIn}"/>
+                        <h:outputLink value="#"><h:outputText value="#{m.recoverYourPassword}"/> </h:outputLink>
+                    </div>
+                </h:form>
+
+            </div>
+        </div>
+        <h:outputStylesheet name="css/layout-green.css" library="atlantis-layout"/>
+    </h:body>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            window.localStorage.setItem("admin", "already");
+        });
+    </script>
+
+</html>

@@ -1,0 +1,78 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:of="http://omnifaces.org/functions"
+                template="/WEB-INF/templates/templateConfirma.xhtml">
+
+    <ui:define name="title">#{m.confirmeSuaConsulta}</ui:define>
+    <f:metadata>
+        <f:viewParam name="hashConsulta" value="#{consultaConfirmaBean.hashConsulta}"/>
+        <f:viewAction action="#{consultaConfirmaBean.init}"/>
+    </f:metadata>
+    <ui:define name="content">
+
+        <h:form id="formPendentes">
+            <div class="ui-g ui-fluid">
+                <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+
+                    <div class="card">
+                        <h:panelGrid rendered="#{consultaConfirmaBean.regularShow}">
+                            <form>
+
+                                <p:outputLabel> #{of:formatDate(consultaConfirmaBean.consultaConfirma.horaInicio,'dd/MM/yyyy')}
+                                </p:outputLabel>
+                                <br></br>
+                                <p:outputLabel> Olá #{consultaConfirmaBean.consultaConfirma.paciente.usuario.nome}, você tem uma
+                                    consulta amanhã às #{of:formatDate(consultaConfirmaBean.consultaConfirma.horaInicio,'HH:mm')} com o(a) Dr.
+                                    #{consultaConfirmaBean.consultaConfirma.agenda.especialista.nome} na #{consultaConfirmaBean.consultaConfirma.agenda.consultorio.nome}. Deseja confirmar sua consulta?
+                                </p:outputLabel>
+
+                                <br></br>
+
+                                <div>
+                                    <p:commandButton id="confirmButton" value="Confirmar"
+                                                     actionListener="#{consultaConfirmaBean.confirmarConsulta}"
+                                                     style="" styleClass="ui-confirmdialog-yes"
+                                                     onclick="$('#loaderId').show();
+                                         $('#formPendentes-confirmButton').hide();
+                                         $('#formPendentes-cancelButton').hide(); ">
+                                    </p:commandButton>
+                                    <div id="loaderId" style="display: none;">
+                                        <i class="fa fa-circle-o-notch fa-spin ajax-loader"
+                                           style="width: 70px;margin-left: 95px" aria-hidden="true"></i></div>
+                                    <br></br>
+
+                                    <p:commandButton value="Cancelar" id="cancelButton"
+                                                     actionListener="#{consultaConfirmaBean.cancelarConsulta}"
+                                                     style="background-color: red;"
+                                                     onclick="$('#loaderId').show();
+                                         $('#formPendentes-confirmButton').hide();
+                                         $('#formPendentes-cancelButton').hide(); " styleClass="ui-confirmdialog-no">
+                                    </p:commandButton>
+                                </div>
+                            </form>
+                        </h:panelGrid>
+
+                        <h:panelGrid rendered="#{consultaConfirmaBean.confirmShow}">
+                            <h3>Consulta CONFIRMADA com sucesso.</h3>
+                        </h:panelGrid>
+                        <h:panelGrid rendered="#{consultaConfirmaBean.cancelShow}">
+                            <h3>Consulta CANCELADA com sucesso.</h3>
+                        </h:panelGrid>
+                        <h:panelGrid rendered="#{consultaConfirmaBean.noneShow}">
+                            <h3>Busca Doctor.</h3>
+                        </h:panelGrid>
+                    </div>
+                </div>
+            </div>
+        </h:form>
+        <script type="text/javascript">
+            var y = document.getElementsByClassName('layout-main');
+            y[0].style.marginLeft = 0;
+
+        </script>
+
+    </ui:define>
+</ui:composition>

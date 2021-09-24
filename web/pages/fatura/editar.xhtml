@@ -1,0 +1,283 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui"
+                xmlns:of="http://omnifaces.org/functions"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.editarFatura}</ui:define>
+
+    <ui:define name="content">
+        <o:importConstants type="br.com.devdojo.projetoinicial.persistence.model.enums.StatusFaturaEnum"/>
+        <c:set value="#{faturaEditBean.statusFaturaEnum.equals(StatusFaturaEnum.FECHADO)}" var="isFaturaFechada"/>
+        <c:set value="#{faturaEditBean.statusFaturaEnum.equals(StatusFaturaEnum.ABERTO)}" var="isFaturaAberta"/>
+        <c:set value="#{faturaEditBean.statusFaturaEnum.equals(StatusFaturaEnum.GLOSADO)}" var="isFaturaGlosada"/>
+        <c:set value="#{faturaEditBean.faturamentosDisponivelList.size() > 0}" var="isFaturamentoDisponivel"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('adicionar') or loginBean.admin}" var="permissaoAdicionarProcedimento"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('remover') or loginBean.admin}" var="permissaoRemoverProcedimento"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('faturar') or loginBean.admin}" var="permissaoFaturar"/>
+        <f:metadata>
+            <f:viewParam name="faturaId" value="#{faturaEditBean.faturaId}"/>
+            <f:viewAction action="#{faturaEditBean.init}"/>
+        </f:metadata>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.faturas}"
+                                    url="/pages/fatura/fatura.xhtml?status=#{faturaEditBean.statusFaturaEnum.status}"/>
+                        <p:menuitem value="#{m.editarFatura}"
+                                    url="/pages/fatura/editar.xhtml?faturaId=#{faturaEditBean.faturaId}"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <div class="card">
+                    <h:link value="#{m.listarFaturas}"
+                            outcome="fatura?status=#{faturaEditBean.statusFaturaEnum.status}"/>
+                </div>
+                <div class="card">
+                    <h3>#{m.editarFatura} #{faturaEditBean.faturaProcedimento.fatura.statusFatura.status}</h3>
+
+                    <p:panelGrid columns="6" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                        <p:outputLabel value="#{m.numeroFatura}" for="numeroFatura" style="font-weight: bold"/>
+                        <h:outputText value="#{faturaEditBean.faturaProcedimento.fatura.numero}"
+                                      id="numeroFatura"/>
+                        <p:outputLabel value="#{m.paciente}" for="paciente" style="font-weight: bold"/>
+                        <h:outputText value="#{faturaEditBean.faturaProcedimento.fatura.paciente.usuario.nome}"
+                                      id="paciente"/>
+
+                        <p:outputLabel value="#{m.dataDaConsulta}" for="dataConsulta" style="font-weight: bold"/>
+                        <h:outputText value="#{faturaEditBean.faturaProcedimento.consulta.horaInicio}"
+                                      id="dataConsulta">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+
+                        <p:outputLabel value="#{m.especialista}" for="especialista" style="font-weight: bold"/>
+                        <h:outputText
+                                value="#{faturaEditBean.faturaProcedimento.consulta.agenda.especialista.nome}"
+                                id="especialista"/>
+
+                        <p:outputLabel value="#{m.especialidade}" for="especialidade" style="font-weight: bold"/>
+                        <h:outputText
+                                value="#{faturaEditBean.faturaProcedimento.consulta.especialidade.especialidade}"
+                                id="especialidade"/>
+                        <p:outputLabel value="#{m.convenio}" for="especialidade" style="font-weight: bold"/>
+                        <h:outputText
+                                value="#{faturaEditBean.faturaProcedimento.consulta.convenio.nome}"
+                                id="convenio"/>
+                        <p:outputLabel value="#{m.faturamento}" for="faturamento" style="font-weight: bold"
+                                       rendered="#{isFaturaFechada}"/>
+                        <h:outputText rendered="#{isFaturaFechada}"
+                                      value="#{of:formatDate(faturaEditBean.faturaProcedimento.fatura.faturamento.inicio, 'dd/MM/yyyy')}
+                                - #{of:formatDate(faturaEditBean.faturaProcedimento.fatura.faturamento.fim, 'dd/MM/yyyy')}"
+                                      id="faturamento"/>
+
+                    </p:panelGrid>
+                </div>
+                <h:form id="form"
+                        rendered="#{faturaEditBean.enableFields}">
+
+                    <div class="card">
+                        <h3>#{m.adicionarNovoProcedimento}</h3>
+                        <p:panelGrid columns="2" layout="grid" columnClasses="ui-grid-col-2,ui-grid-col-5"
+                                     styleClass="ui-panelgrid-blank form-group">
+                            <h:outputLabel value="#{m.procedimento}" for="procedimentos"/>
+                            <p:selectOneMenu id="procedimentos"
+                                             value="#{faturaEditBean.newFaturaProcedimento.procedimentoEspecialista}"
+                                             required="true" requiredMessage="Um procedimento é necessário"
+                                             converter="entityConverter">
+                                <f:selectItem value="#{null}"
+                                              itemLabel="Selecione um novo procedimento a ser adicionado"/>
+                                <f:selectItems value="#{faturaEditBean.procedimentoEspecialistaList}"
+                                               var="procedimentoEspecialista"
+                                               itemValue="#{procedimentoEspecialista}"
+                                               itemLabel="#{procedimentoEspecialista.procedimentoConvenio.procedimento.nome}"/>
+                            </p:selectOneMenu>
+                            <h:outputLabel value="#{m.qtde}" for="qtde"/>
+                            <p:inputText id="qtde" value="#{faturaEditBean.newFaturaProcedimento.quantidade}"
+                                         validator="#{validatorBean.validateQuantidadeProcedimento}"
+                                         onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"
+                                         style="width: 30%"/>
+                            <h:outputLabel value="#{m.numeroDaGuia}" for="guia"/>
+                            <p:inputText id="guia" value="#{faturaEditBean.newFaturaProcedimento.guia}"
+                                         onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"
+                                         style="width: 30%"/>
+                            <p:commandButton value="#{m.adicionarNovoProcedimento}" rendered="#{permissaoAdicionarProcedimento}"
+                                             actionListener="#{faturaEditBean.addFaturaProcedimento}"
+                                             update="form2-dataTable @form"/>
+                        </p:panelGrid>
+                    </div>
+                </h:form>
+                <h:form id="form2">
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                        <p:remoteCommand name="onCellEdit" process="@this" update="dataTable" ignoreAutoUpdate="true"/>
+
+                        <p:dataTable value="#{faturaEditBean.faturaProcedimentoList}" var="faturaProcedimento"
+                                     reflow="true" resizableColumns="true"
+                                     rowKey="#{faturaProcedimento.id}"
+                                     id="dataTable"
+                                     editable="true" editMode="cell"
+                                     selection="#{faturaEditBean.faturaProcedimentoSelectedList}"
+                                     tableStyle="table-layout: auto; text-align: center"
+                                     disabledSelection="#{faturaEditBean.faturaProcedimentoList.size() le 1 or !faturaEditBean.enableFields }"
+                                     sortBy="#{faturaEditBean.faturaProcedimento.procedimentoEspecialista.procedimentoConvenio.valor}">
+                            <p:ajax event="cellEdit" update="dataTable" oncomplete="onCellEdit();"/>
+                            <p:column selectionMode="multiple"/>
+                            <f:facet name="header">
+                                <h:outputText value="#{m.procedimentos}"/>
+                            </f:facet>
+                            <p:column headerText="#{m.numeroDaGuia}">
+                                <p:cellEditor>
+                                    <f:facet name="output">
+                                        <h:outputText value="#{faturaProcedimento.guia}"/>
+                                    </f:facet>
+                                    <f:facet name="input">
+                                        <p:inputText id="numeroFaturamento"
+                                                     rendered="#{faturaEditBean.enableFields}"
+                                                     value="#{faturaProcedimento.guia}"
+                                                     onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"/>
+                                    </f:facet>
+                                </p:cellEditor>
+                            </p:column>
+                            <p:column headerText="#{m.tipo}">
+                                <h:outputText
+                                        value="#{faturaProcedimento.fatura.tipoFatura.tipo}"/>
+                            </p:column>
+                            <p:column headerText="#{m.procedimento}">
+                                <h:outputText
+                                        value="#{faturaProcedimento.procedimentoEspecialista.procedimentoConvenio.procedimento.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.qtde}">
+                                <p:cellEditor>
+                                    <f:facet name="output"> <h:outputText
+                                            value="#{faturaProcedimento.quantidade}"/></f:facet>
+                                    <f:facet name="input"><p:inputText value="#{faturaProcedimento.quantidade}"
+                                                                       rendered="#{faturaEditBean.enableFields}"
+                                                                       onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"/></f:facet>
+                                </p:cellEditor>
+                            </p:column>
+
+                            <p:column headerText="#{m.total}">
+                                <h:outputText
+                                        value="#{faturaProcedimento.quantidade * faturaProcedimento.procedimentoEspecialista.procedimentoConvenio.valor}">
+                                    <f:convertNumber type="currency" currencySymbol="R$ "/>
+                                </h:outputText>
+                            </p:column>
+                            <p:summaryRow>
+
+                                <p:column colspan="6" style="text-align:right;">
+                                    <h:outputText
+                                            value="#{faturaEditBean.faturaProcedimentoList.stream().map(fp -> fp.quantidade * fp.procedimentoEspecialista.procedimentoConvenio.valor).sum()}">
+                                        <f:convertNumber type="currency" currencySymbol="Total R$ "/>
+                                    </h:outputText>
+                                </p:column>
+                            </p:summaryRow>
+                        </p:dataTable>
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group"
+                                     rendered="#{faturaEditBean.enableFields}">
+                            <p:commandButton value="#{m.removerProcedimentosSelecionado}" rendered="#{permissaoRemoverProcedimento}"
+                                             actionListener="#{faturaEditBean.removeProcedimentoFromFatura}"
+                                             update="dataTable" style="background-color: red"/>
+                        </p:panelGrid>
+                    </div>
+
+                    <h:panelGroup
+                            rendered="#{!isFaturamentoDisponivel and !isFaturaFechada}">
+                        <div class="card">
+                            <div id="form2-messages" class="ui-messages ui-widget" aria-live="polite">
+                                <div class="ui-messages-warn ui-corner-all">
+                                    <span class="ui-messages-warn-icon"/>
+                                    <ul>
+                                        <li>
+                                            <span class="ui-messages-warn-summary">#{m.warnNenhumFaturamentoEncontrado}:
+                                                <h:outputText
+                                                        value="#{faturaEditBean.faturaProcedimento.consulta.horaInicio}">
+                                                    <f:convertDateTime locale="#{loginBean.locale}"/>
+                                                </h:outputText>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{isFaturamentoDisponivel and !isFaturaFechada}">
+                        <div class="card">
+                            <h3>#{m.selecioneUmFaturamento}</h3>
+                            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         columnClasses="ui-grid-col-2,ui-grid-col-5">
+                                <h:outputLabel value="#{m.faturamentos}" for="faturamentos"/>
+                                <p:selectOneMenu id="faturamentos"
+                                                 value="#{faturaEditBean.faturamentoDisponivel}"
+                                                 converter="entityConverter">
+                                    <f:selectItem value="#{null}"
+                                                  itemLabel="Selecione um faturamento para faturar esta fatura"/>
+                                    <f:selectItems value="#{faturaEditBean.faturamentosDisponivelList}"
+                                                   var="faturamento"
+                                                   itemValue="#{faturamento}"
+                                                   itemLabel="#{of:formatDate(faturamento.inicio,'dd/MM/yyyy')} - #{of:formatDate(faturamento.fim,'dd/MM/yyyy')}"/>
+                                    <p:ajax event="change" update="faturar"/>
+                                </p:selectOneMenu>
+                            </p:panelGrid>
+                        </div>
+                    </h:panelGroup>
+                    <div class="card">
+                        <div class="card-w-title">
+                            <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+
+                                <p:button value="#{m.cancelar}"
+                                          href="#{faturaEditBean.previousPage}"/>
+
+                                <p:commandButton value="#{m.atualizar}" action="#{faturaEditBean.update}"
+                                                 rendered="#{isFaturaAberta || isFaturaGlosada}"/>
+
+                                <p:commandButton value="#{m.glosar}"
+                                                 action="#{faturaEditBean.update(StatusFaturaEnum.GLOSADO)}"
+                                                 rendered="#{isFaturaFechada }">
+                                    <p:confirm header="#{m.confirmaEstaAcao}"
+                                               message="#{m.desejaGlosarFatura}"
+                                               icon="ui-icon-alert"/>
+                                </p:commandButton>
+                                <p:commandButton value="#{m.faturar}" id="faturar"
+                                                 action="#{faturaEditBean.update(StatusFaturaEnum.FECHADO)}"
+                                                 rendered="#{faturaEditBean.enableFields and permissaoFaturar}"
+                                                 disabled="#{faturaEditBean.faturamentoDisponivel == null}">
+                                    <p:confirm header="#{m.confirmaEstaAcao}"
+                                               message="#{m.desejaFaturarFatura}"
+                                               icon="ui-icon-alert"/>
+                                </p:commandButton>
+                            </p:panelGrid>
+                        </div>
+                    </div>
+
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                  oncomplete="setTimeout(function() { $('.ui-messages-error').slideUp(); }, 5000)"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="#{m.sim}" type="button" styleClass="ui-confirmdialog-yes"
+                                         icon="ui-icon-check"/>
+                        <p:commandButton value="#{m.nao}" type="button" styleClass="ui-confirmdialog-no"
+                                         icon="ui-icon-close"/>
+                    </p:confirmDialog>
+                </h:form>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

@@ -1,0 +1,308 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.editarPaciente}</ui:define>
+
+    <ui:define name="content">
+        <p:importEnum type="br.com.devdojo.projetoinicial.persistence.model.enums.Sexo" var="Sexo"
+                      allSuffix="ALL_ENUM_VALUES"/>
+        <f:metadata>
+            <f:viewParam name="pacienteId" value="#{pacienteEditBean.pacienteId}"/>
+            <f:viewParam name="usuarioId" value="#{pacienteEditBean.usuarioId}"/>
+            <f:viewAction action="#{pacienteEditBean.init}"/>
+        </f:metadata>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-6" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.paciente}" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.editarPaciente}" url="/pages/paciente/editar.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-6" style="margin: 0 auto;">
+                <h:form>
+                    <h1>
+                        <h:outputText value="#{pacienteEditBean.paciente.usuario.nome}"/>
+                    </h1>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-6" style="margin: 0 auto;">
+                <h:form>
+                    <p:tabMenu activeIndex="#{param.i}">
+                        <p:menuitem value="Perfil do Paciente" outcome="/pages/paciente/editar" icon="fa fa-fw fa-user">
+                            <f:param name="i" value="0"/>
+                            <f:param name="pacienteId" value="#{pacienteEditBean.paciente.id}"/>
+                        </p:menuitem>
+                        <p:menuitem value="Consultas do Paciente" outcome="/pages/paciente/consultas"
+                                    icon="ui-icon-calendar">
+                            <f:param name="i" value="1"/>
+                            <f:param name="usuarioId" value="#{pacienteEditBean.paciente.usuario.id}"/>
+                            <f:param name="pacienteNome" value="#{pacienteEditBean.paciente.usuario.nome}"/>
+                            <f:param name="pacienteId" value="#{pacienteEditBean.paciente.id}"/>
+                        </p:menuitem>
+                        <p:menuitem value="Prontuário" outcome="/pages/paciente/prontuarios" icon="ui-icon-clipboard">
+                            <f:param name="pacienteId" value="#{pacienteEditBean.paciente.id}"/>
+                            <f:param name="i" value="2"/>
+                        </p:menuitem>
+                        <p:menuitem value="Imagens e Videos" outcome="/pages/paciente/exames" icon="ui-icon-image">
+                            <f:param name="i" value="3"/>
+                        </p:menuitem>
+                    </p:tabMenu>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-6" style="margin: 0 auto;">
+                <h:form id="form">
+                    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                    <div class="card" id="dadospaciente">
+                        <div class="card card-w-title">
+                            <div>
+                                <p:graphicImage name="images/avatar2.png" library="atlantis-layout"
+                                                rendered="#{pacienteEditBean.paciente.usuario.sexo.equals('Feminino')
+                                                and pacienteEditBean.paciente.usuario.foto eq null}"/>
+
+                                <p:graphicImage name="images/avatar4.png" library="atlantis-layout"
+                                                rendered="#{pacienteEditBean.paciente.usuario.sexo.equals('Masculino')
+                                                and pacienteEditBean.paciente.usuario.foto eq null}"/>
+                            </div>
+                            <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+
+                                <p:outputLabel value="Número do Prontuário" for="numeroregistro"/>
+                                <p:inputText value="#{pacienteEditBean.paciente.numeroRegistro}" id="numeroregistro"
+                                             placeholder="false" rendered="true" disabled="true"/>
+
+                                <p:outputLabel value="Nome completo" for="nome"/>
+                                <p:inputText value="#{pacienteEditBean.paciente.usuario.nome}" id="nome"
+                                             placeholder="Nome do Paciente" required="true"/>
+
+                                <p:outputLabel value="E-mail" for="email"/>
+                                <p:inputText value="#{pacienteEditBean.paciente.usuario.email}" id="email"
+                                             placeholder="E-mail" required="false"/>
+
+                                <h:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                                    <p:selectOneRadio id="sexo" value="#{pacienteEditBean.paciente.usuario.sexo}">
+                                        <f:selectItem itemLabel="Masculino" itemValue="Masculino"/>
+                                        <f:selectItem itemLabel="Feminino" itemValue="Feminino"/>
+                                    </p:selectOneRadio>
+                                </h:panelGrid>
+
+                                <p:outputLabel value="Data de nascimento" for="nascimento"/>
+                                <p:calendar value="#{pacienteEditBean.paciente.usuario.birthday}"
+                                            id="nascimento" required="true"
+                                            placeholder="Data de nascimento" navigator="true" pattern="dd/MM/yyyy"
+                                            mask="true"/>
+
+                                <p:outputLabel value="CPF" for="cpf"/>
+                                <p:inputMask value="#{pacienteEditBean.paciente.usuario.cpf}" id="cpf"
+                                             placeholder="CPF"
+                                             mask="999.999.999-99"/>
+
+                                <p:outputLabel value="RG" for="rg"/>
+                                <p:inputText value="#{pacienteEditBean.paciente.usuario.rg}" id="rg"
+                                             placeholder="RG"/>
+
+                                <p:outputLabel value="Telefone Celular" for="celular"/>
+                                <p:inputMask value="#{pacienteEditBean.paciente.usuario.celular}" id="celular"
+                                             placeholder="Celular" required="false" mask="(99)99999-9999" >
+                                    <f:validateLength minimum="9" ></f:validateLength>
+                                </p:inputMask>
+
+                                <p:outputLabel value="Telefone Residencial" for="residencial"/>
+                                <p:inputMask value="#{pacienteEditBean.paciente.usuario.telefoneResidencia}"
+                                             id="residencial" placeholder="Telefona Residencial" required="false"
+                                             mask="(99)9999-9999"/>
+
+                                <p:outputLabel value="Telefone Recado" for="recado"/>
+                                <p:inputMask value="#{pacienteEditBean.paciente.usuario.telefoneRecado}"
+                                             id="recado" placeholder="Telefona para Recado" required="false"
+                                             mask="(99)9999-9999"/>
+
+                                <p:outputLabel value="Estado Cívil" for="civil"/>
+                                <p:selectOneMenu id="civil" value="#{pacienteEditBean.paciente.usuario.estadoCivil}"
+                                                 style="width:150px">
+                                    <f:selectItem itemLabel="Selecione Um" itemValue=""/>
+                                    <f:selectItem itemLabel="SOLTEIRO" itemValue="SOLTEIRO"/>
+                                    <f:selectItem itemLabel="CASADO" itemValue="CASADO"/>
+                                    <f:selectItem itemLabel="VÍUVO" itemValue="VÍUVO"/>
+                                    <f:selectItem itemLabel="SEPARADO" itemValue="SEPARADO"/>
+                                </p:selectOneMenu>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         style="width: 60%">
+                                <p:inputMask value="#{pacienteEditBean.paciente.usuario.logradouro.cep}" id="cep"
+                                             placeholder="Cep"
+                                             mask="99999-999"/>
+
+                                <p:commandButton value="#{m.buscarCep}"
+                                                 action="#{pacienteEditBean.findCep}"
+                                                update="tipoLogradouro logradouro bairro cid estado">
+                                </p:commandButton>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         style="width: 60%">
+                                <p:inputText id="tipoLogradouro" readonly="true" placeholder="Tipo do Logradouro"
+                                             value="#{pacienteEditBean.paciente.usuario.logradouro.tipo}"/>
+
+                                <p:inputText id="logradouro" readonly="true" placeholder="Logradouro"
+                                             value="#{pacienteEditBean.paciente.usuario.logradouro.nome}"/>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         style="width: 60%">
+                                <p:inputText id="numero" placeholder="numero"
+                                             value="#{pacienteEditBean.paciente.usuario.numero}">
+                                    <f:convertNumber integerOnly="true" groupingUsed="false"/>
+                                </p:inputText>
+
+                                <p:inputText id="comp" placeholder="complemento"
+                                             value="#{pacienteEditBean.paciente.usuario.complemento}"/>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+
+                                <p:inputText readonly="true" id="bairro" placeholder="bairro"
+                                             value="#{pacienteEditBean.paciente.usuario.logradouro.bairro}"/>
+
+                                <p:inputText readonly="true" id="cid" placeholder="cidade"
+                                             value="#{pacienteEditBean.paciente.usuario.logradouro.cidade.nome}"/>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                                <p:inputText readonly="true" id="estado" placeholder="estado"
+                                             value="#{pacienteEditBean.paciente.usuario.logradouro.cidade.estado.nome}"/>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         style="width: 60%">
+
+                                <p:selectOneMenu id="cor" value="#{pacienteEditBean.paciente.usuario.cor}"
+                                                 style="width:175px">
+                                    <f:selectItem itemLabel="Selecione a Cor ou Raça" itemValue=""/>
+                                    <f:selectItem itemLabel="BRANCA" itemValue="Branca"/>
+                                    <f:selectItem itemLabel="PRETA" itemValue="Preta"/>
+                                    <f:selectItem itemLabel="PARDA" itemValue="Parda"/>
+                                    <f:selectItem itemLabel="INDÍGENA" itemValue="Indígena"/>
+                                    <f:selectItem itemLabel="AMARELA" itemValue="Amarela"/>
+                                </p:selectOneMenu>
+
+                                <p:inputText id="naturalidade" placeholder="naturalidade"
+                                             value="#{pacienteEditBean.paciente.usuario.naturalidade}"/>
+
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         style="width: 60%">
+                                <p:outputLabel value="Profissão" for="profissao"/>
+                                <p:inputText value="#{pacienteEditBean.paciente.usuario.profissao}" id="profissao"
+                                             placeholder="Profissao" required="false"/>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         style="width: 60%">
+                                <p:outputLabel value="Observação" for="obs"/>
+                                <p:inputText value="#{pacienteEditBean.paciente.observacao}" id="obs"
+                                             placeholder="Observação" required="false"/>
+                            </p:panelGrid>
+                        </div>
+                    </div>
+
+                    <div class="card card-w-title">
+                        <p:messages id="userConvenio" showDetail="true" autoUpdate="true" closable="true"/>
+                        <h3>#{m.addConvenio}</h3>
+                        <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="height:80%">
+                            <h:outputLabel value="#{m.convenio}" for="usuarioConvenio"/>
+                            <p:selectOneMenu id="usuarioConvenio"
+                                             value="#{pacienteEditBean.newUsuarioConvenio.convenio}"
+                                             converter="entityConverter" style="width:175px">
+                                <f:selectItem value="#{null}" itemLabel="Selecione um convênio"/>
+                                <f:selectItems var="usuarioConvenio" itemValue="#{usuarioConvenio}"
+                                               itemLabel="#{usuarioConvenio.nome}"
+                                               value="#{applicationBean.convenioList}"/>
+                            </p:selectOneMenu>
+
+                            <h:outputLabel value="#{m.numeroConvenio}"/>
+                            <p:inputText id="numeroConvenio" value="#{pacienteEditBean.newUsuarioConvenio.numero}"
+                                         onfocus="this.value='';"
+                                         style="width:175px"/>
+                            <p:commandButton value="#{m.btnAddConvenio}"
+                                             actionListener="#{pacienteEditBean.addUsuarioConvenio()}"
+                                             update="dataTable"/>
+                        </p:panelGrid>
+                    </div>
+                    <div class="card">
+                        <p:dataTable id="dataTable" var="convenio" value="#{pacienteEditBean.usuarioConvenioList}"
+                                     selection="#{pacienteEditBean.usuarioConvenioListSelected}"
+                                     rowKey="#{convenio.convenio.nome}"
+                                     paginator="true"
+                                     rows="5"
+                                     paginatorPosition="bottom"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <f:facet name="header">
+                                <h:outputText value="#{m.conveniosPaciente}"/>
+                            </f:facet>
+
+                            <p:column selectionMode="multiple"/>
+                            <p:column headerText="Convenio">
+                                <h:outputText value="#{convenio.convenio.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="Número">
+                                <h:outputText value="#{convenio.numero}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.editar}">
+                                <f:param name="pacienteId" value=""/>
+                                <i class="fa fa-pencil"/>
+                            </p:column>
+                        </p:dataTable>
+
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group">
+                            <p:commandButton value="#{m.removerConvenios}"
+                                             actionListener="#{pacienteEditBean.removeUsuarioConvenio}"
+                                             update="dataTable" style="background-color: red"/>
+                        </p:panelGrid>
+                        <br/>
+
+                        <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:commandButton value="#{m.cancelar}" onclick="window.history.back();"/>
+                            <p:commandButton value="#{m.atualizar}" action="#{pacienteEditBean.update}"/>
+                        </p:panelGrid>
+                    </div>
+
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                </h:form>
+            </div>
+        </div>
+
+        <script type="application/javascript">
+            $('#form-celular').mask('(99)99999-9999');
+        </script>
+
+    </ui:define>
+</ui:composition>

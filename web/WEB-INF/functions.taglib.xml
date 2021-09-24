@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<facelet-taglib xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facelettaglibrary_2_2.xsd"
+                version="2.2">
+    <description>Custom Functions By André Ribeiro, William Suane</description>
+    <namespace>http://br.com.devdojo/functions</namespace>
+    <short-name>df</short-name>
+    <function>
+        <description>
+            <![CDATA[
+				Retorna uma string separada por vírgula dos Status da consulta
+			]]>
+        </description>
+        <function-name>capitalize</function-name>
+        <function-class>br.com.devdojo.projetoinicial.taglib.TaglibFunctions</function-class>
+        <function-signature>java.lang.String capitalize(java.lang.String)</function-signature>
+    </function>
+    <function>
+        <description>
+            <![CDATA[
+				Formata as duas datas de acordo com o pattern passado e retorna uma String separada por -
+			]]>
+        </description>
+        <function-name>formatTwoDates</function-name>
+        <function-class>br.com.devdojo.projetoinicial.taglib.TaglibFunctions</function-class>
+        <function-signature>java.lang.String formatTwoDates(java.util.Date, java.util.Date, java.lang.String)</function-signature>
+    </function>
+</facelet-taglib>

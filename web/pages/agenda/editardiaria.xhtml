@@ -1,0 +1,282 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:of="http://omnifaces.org/functions"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.agendaDiaria}</ui:define>
+
+    <f:metadata>
+        <f:viewParam name="especialistaId" value="#{agendaDiariaEditBean.especialistaId}"/>
+        <f:viewParam name="dateAgendaInicio" value="#{agendaDiariaEditBean.dateAgendaInicio}"
+                     converter="dateToStringYYYMMDDHHMMConverter"/>
+        <f:viewParam name="dateAgendaFim" value="#{agendaDiariaEditBean.dateAgendaFim}"
+                     converter="dateToStringYYYMMDDHHMMConverter"/>
+        <f:viewParam name="inicio" value="#{agendaDiariaEditBean.inicio}"/>
+        <f:viewParam name="fim" value="#{agendaDiariaEditBean.fim}"/>
+
+        <f:viewAction action="#{agendaDiariaEditBean.init}"/>
+    </f:metadata>
+
+    <ui:define name="content">
+        <o:importConstants type="br.com.devdojo.projetoinicial.persistence.model.enums.DiasDaSemanaEnum"/>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.especialistas}" url="/pages/especialista/especialistashabilitados.xhtml"/>
+
+                        <p:menuitem value="#{m.listarAgendas}"
+                                    url="/pages/agenda/agenda.xhtml?especialistaId=#{agendaDiariaEditBean.especialistaId}&amp;inicio=#{agendaDiariaEditBean.inicio}&amp;fim=#{agendaDiariaEditBean.fim}"/>
+                        <p:menuitem value="#{m.editarAgendaDiaria}" url="#" styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="form">
+                    <div class="card">
+                        <p:link value="#{m.listarAgendas}" outcome="agenda">
+                            <f:param name="especialistaId" value="#{agendaDiariaEditBean.especialistaId}"/>
+                            <f:param name="inicio" value="#{agendaDiariaEditBean.inicio}"/>
+                            <f:param name="fim" value="#{agendaDiariaEditBean.fim}"/>
+                        </p:link>
+                    </div>
+                    <div class="card">
+                        <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:calendar value="#{agendaDiariaEditBean.dateAgendaInicio}"
+                                        id="inicio"
+                                        placeholder="#{m.dataInicio}" navigator="true"
+                                        pattern="dd/MM/yyyy"
+                                        mindate="#{agendaDiariaEditBean.today}"
+                                        mask="true" locale="#{loginBean.locale}">
+                                <p:ajax event="dateSelect" update="fim"/>
+                            </p:calendar>
+                            <p:calendar value="#{agendaDiariaEditBean.dateAgendaFim}"
+                                        id="fim"
+                                        mindate="#{agendaDiariaEditBean.dateAgendaInicio}"
+                                        placeholder="#{m.dataFim}" navigator="true"
+                                        pattern="dd/MM/yyyy"
+                                        mask="true" locale="#{loginBean.locale}">
+                                <p:ajax event="dateSelect"/>
+                            </p:calendar>
+
+                            <p:selectCheckboxMenu id="multiple" value="#{agendaDiariaEditBean.daysOfWeekSelected}"
+                                                  label="Dia da Semana" multiple="true"
+                                                  filter="true" filterMatchMode="startsWith" panelStyle="width:250px">
+                                <f:selectItems value="#{DiasDaSemanaEnum.values()}" var="dia"
+                                               itemValue="#{dia.labelEnglish}"/>
+                            </p:selectCheckboxMenu>
+
+                            <p:commandButton value="#{m.buscar}" actionListener="#{agendaDiariaEditBean.search}"
+                                             update="time"/>
+
+                            <h:outputLink id="info1" value="#">
+                                <i class="fa fa-info" aria-hidden="true" style="text-align: left"/>
+                            </h:outputLink>
+                            <p:tooltip for="info1"
+                                       value="#{m.warningEditAgendas}"
+                                       trackMouse="true"/>
+
+                        </p:panelGrid>
+                    </div>
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+
+                        <p:panelGrid columns="6" layout="grid" styleClass="ui-panelgrid-blank">
+                            <p:calendar value="#{agendaDiariaEditBean.horaInicioRep}" mode="popup"
+                                        size="5"
+                                        id="horaInicioRep"
+                                        showOn="button"
+                                        timeOnly="true"
+                                        pattern="HH:mm"
+                                        placeholder="#{m.horaInicio}"
+                                        mask="true"
+                                        converterMessage="#{m.errorHoraInicial}"
+                                        label="#{m.dataInicio}"/>
+
+                            <p:calendar value="#{agendaDiariaEditBean.horaFinalRep}" mode="popup"
+                                        size="5"
+                                        id="horaFinalRep"
+                                        showOn="button"
+                                        timeOnly="true"
+                                        placeholder="#{m.horaFim}"
+                                        pattern="HH:mm"
+                                        mask="true"
+                                        converterMessage="#{m.errorHoraFinal}"
+                                        label="#{m.dataInicio}"/>
+
+                            <p:inputText value="#{agendaDiariaEditBean.tempoConsultaRep}"
+                                         onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"
+                                         id="tempoReplica" size="2"/>
+                            <p:commandButton value="Replicar" update="time"
+                                             actionListener="#{agendaDiariaEditBean.replicarHorariosParaAgendasSemConsulta}"/>
+                            <h:outputLink id="duvida" value="#">
+                                <i class="fa fa-question" aria-hidden="true" style="text-align: left"/>
+                            </h:outputLink>
+                            <p:tooltip id="toolTip" for="duvida"
+                                       value="#{m.infoReplicarHorarios}"
+                                       trackMouse="true"/>
+                        </p:panelGrid>
+                    </div>
+                    <h:panelGroup id="time" style="margin: 10 auto;">
+                        <c:forEach items="#{agendaDiariaEditBean.dateAgendasMap.entrySet().toArray()}" var="entry">
+                            <div class="card">
+                                <p:panelGrid columns="7" layout="grid" styleClass="ui-panelgrid-blank">
+                                    <!--Sempre vai ter um horário, senão tiver a bronca não é aqui-->
+                                    <c:set var="readOnly" value="#{entry.key lt agendaDiariaEditBean.today
+                                    || agendaDiariaEditBean.agendasWithConsulta.contains(entry.value.get(0))}"/>
+
+                                    <h:outputText value="#{entry.key}" id="dataLabel"
+                                                  style="#{agendaDiariaEditBean.datesChanged.contains(entry.key) ? 'color:red' : ''} ">
+                                        <f:convertDateTime dateStyle="full" locale="#{loginBean.locale}"/>
+                                    </h:outputText>
+                                    <p:calendar value="#{agendaDiariaEditBean.tempDateToUpdate}" mode="popup"
+                                                id="data"
+                                                rendered="#{!readOnly}"
+                                                locale="#{loginBean.locale}"
+                                                mindate="#{agendaDiariaEditBean.today}"
+                                                pattern="dd/MM/yyyy"
+                                                placeholder="Alterar data dessa agenda"
+                                                mask="true"
+                                                beforeShowDay="disableAllTheseDays"
+                                                converterMessage="#{m.errorHoraInicial}"
+                                                label="#{m.dataInicio}">
+                                        <p:ajax event="dateSelect" process="@this" update="time"
+                                                listener="#{agendaDiariaEditBean.changeDate(entry.key)}"/>
+                                    </p:calendar>
+                                </p:panelGrid>
+                                <p:panelGrid columns="7" layout="grid"
+                                             styleClass="ui-panelgrid-blank form-group-centered">
+                                    <c:forEach items="#{entry.value}" var="agenda" varStatus="status">
+                                        <p:panelGrid columns="1">
+
+                                            <p:outputLabel value="#{m.horaInicio}" for="horaInicio"/>
+
+                                            <h:outputText
+                                                    value="#{of:formatDate(entry.value.get(status.index).dataInicio,'HH:mm')}"
+                                                    rendered="#{readOnly}"/>
+                                            <p:calendar value="#{entry.value.get(status.index).dataInicio}" mode="popup"
+                                                        rendered="#{!readOnly}"
+                                                        size="5"
+                                                        id="horaInicio"
+                                                        showOn="button"
+                                                        timeOnly="true"
+                                                        pattern="HH:mm"
+                                                        mask="true"
+                                                        converterMessage="#{m.errorHoraInicial}"
+                                                        required="true" requiredMessage="#{m.requiredHoraInicio}"
+                                                        label="#{m.dataInicio}"/>
+                                        </p:panelGrid>
+                                        <p:panelGrid columns="1">
+                                            <p:outputLabel value="#{m.horaFim}" for="horaFinal"/>
+                                            <h:outputText
+                                                    value="#{of:formatDate(entry.value.get(status.index).dataFinal,'HH:mm')}"
+                                                    rendered="#{readOnly}"/>
+                                            <p:calendar value="#{entry.value.get(status.index).dataFinal}" mode="popup"
+                                                        rendered="#{!readOnly}"
+                                                        size="5"
+                                                        id="horaFinal"
+                                                        showOn="button"
+                                                        timeOnly="true"
+                                                        pattern="HH:mm"
+                                                        mask="true"
+                                                        converterMessage="#{m.errorHoraFinal}"
+                                                        required="true" requiredMessage="#{m.requiredHoraFim}"
+                                                        label="#{m.dataInicio}"/>
+                                        </p:panelGrid>
+                                        <p:panelGrid columns="1">
+
+                                            <p:outputLabel value="#{m.tempoDeConsulta}" for="tempo"/>
+                                            <h:outputText value="#{entry.value.get(status.index).tempoConsulta}"
+                                                          rendered="#{readOnly}"/>
+                                            <p:inputText value="#{entry.value.get(status.index).tempoConsulta}"
+                                                         rendered="#{!readOnly}"
+                                                         onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"
+                                                         required="true"
+                                                         requiredMessage="Favor preencher o tempo da consulta"
+                                                         id="tempo">
+                                                <p:ajax event="blur" update="qtde"
+                                                        process="@this horaInicio horaFinal"
+                                                        listener="#{agendaDiariaEditBean.calcularQuantidadeDeConsultasPossiveisParaOIntervaloDeHoras(entry.value.get(status.index))}"/>
+                                            </p:inputText>
+                                        </p:panelGrid>
+                                        <p:panelGrid columns="1">
+                                            <h:outputLabel for="qtde" value="Quantidade de consultas"/>
+                                            <p:outputLabel id="qtde"
+                                                           value="#{entry.value.get(status.index).quantidadeDeConsultas}"/>
+                                        </p:panelGrid>
+                                        <p:panelGrid columns="1">
+                                            <p:outputLabel value="#{m.liberarAgenda}" for="liberado"/>
+                                            <h:outputText
+                                                    value="#{entry.value.get(status.index).liberado ? 'Sim' : 'Não'}"
+                                                    rendered="#{readOnly}"/>
+                                            <p:inputSwitch value="#{entry.value.get(status.index).liberado}"
+                                                           rendered="#{!readOnly}" id="liberado"
+                                                           onLabel="Sim" offLabel="Não"/>
+                                        </p:panelGrid>
+
+                                        <p:panelGrid columns="1">
+                                            <p:outputLabel value="#{m.visivelApp}" for="visivelApp"/>
+                                            <h:outputText
+                                                    value="#{entry.value.get(status.index).visivelApp ? 'Sim' : 'Não'}"
+                                                    rendered="#{readOnly}" id="visivelApp"/>
+                                        <p:inputSwitch value="#{entry.value.get(status.index).visivelApp}"
+                                                       rendered="#{!readOnly}"
+                                                       onLabel="Sim" offLabel="Não"/>
+                                        </p:panelGrid>
+
+
+                                        <p:panelGrid columns="1">
+
+                                            <h:outputLabel for="remover" value="Remover agenda"/>
+
+                                            <p:commandButton value="#{m.remover}" id="remover"
+                                                             actionListener="#{agendaDiariaEditBean.remove(entry.value.get(status.index), entry.key)}"
+                                                             disabled="#{readOnly ||  agendaDiariaEditBean.datesChanged.contains(entry.key)}"
+                                                             update="time"/>
+
+                                        </p:panelGrid>
+                                    </c:forEach>
+
+                                </p:panelGrid>
+                            </div>
+                        </c:forEach>
+                    </h:panelGroup>
+                    <div class="card">
+                        <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:button value="#{m.cancelar}"
+                                      outcome="agenda">
+                                <f:param name="especialistaId" value="#{agendaDiariaEditBean.especialistaId}"/>
+                                <f:param name="inicio" value="#{agendaDiariaEditBean.inicio}"/>
+                                <f:param name="fim" value="#{agendaDiariaEditBean.fim}"/>
+                            </p:button>
+
+                            <p:commandButton value="#{m.atualizar}"
+                                             action="#{agendaDiariaEditBean.update}"/>
+
+                        </p:panelGrid>
+                    </div>
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                  oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 10000)"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                </h:form>
+            </div>
+        </div>
+        <script type="text/javascript">var disabledDays = eval(#{agendaDiariaEditBean.datasRestritas});</script>
+        <h:outputScript name="js/disabledays.js" library="atlantis-layout"/>
+
+    </ui:define>
+
+</ui:composition>
+

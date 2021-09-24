@@ -1,0 +1,210 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.editarFaturamento}</ui:define>
+
+    <ui:define name="content">
+        <p:importEnum type="br.com.devdojo.projetoinicial.persistence.model.enums.StatusFaturamentoEnum"
+                      var="StatusFaturamentoEnum"
+                      allSuffix="ALL_ENUM_VALUES"/>
+
+        <c:set value="#{faturamentoEditBean.statusFaturamentoEnum.equals(StatusFaturamentoEnum.ABERTO)}" var="isFaturamentoAberto"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('remover') or loginBean.admin}" var="permissaoRemoverFatura"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('fechar') or loginBean.admin}" var="permissaoFecharFaturamento"/>
+        <f:metadata>
+            <f:viewParam name="faturamentoId" value="#{faturamentoEditBean.faturamentoId}"/>
+            <!--<f:viewParam name="close" value="#{faturamentoEditBean.close}"/>-->
+            <f:viewParam name="inicio" value="#{faturamentoEditBean.inicio}"/>
+            <f:viewParam name="fim" value="#{faturamentoEditBean.fim}"/>
+            <f:viewParam name="status" value="#{faturamentoEditBean.statusFaturamentoParam}"/>
+            <f:viewAction action="#{faturamentoEditBean.init}"/>
+        </f:metadata>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.faturamentos}"
+                                    url="/pages/faturamento/faturamento.xhtml?inicio=#{faturamentoEditBean.inicio}&amp;fim=#{faturamentoEditBean.fim}&amp;status=#{faturamentoEditBean.statusFaturamentoParam}"/>
+                        <p:menuitem value="#{m.editarFaturamento}"
+                                    url="/pages/faturamento/editar.xhtml?faturamentoId=#{faturamentoEditBean.faturamentoId}"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="form">
+                    <div class="card">
+                        <h:link outcome="faturamento?inicio=#{faturamentoEditBean.inicio}&amp;fim=#{faturamentoEditBean.fim}&amp;status=#{faturamentoEditBean.statusFaturamentoParam}"
+                                value="#{m.listarFaturamentos}"/>
+                    </div>
+                    <div class="card">
+                        <h2>
+                            <h:outputText value="#{m.editarFaturamentoDoPeriodo}: "/>
+                            <h:outputText value="#{faturamentoEditBean.faturamento.inicio}">
+                                <f:convertDateTime pattern="dd/MMM/yyyy" locale="#{loginBean.locale}"/>
+                            </h:outputText>
+                            -
+                            <h:outputText value="#{faturamentoEditBean.faturamento.fim}">
+                                <f:convertDateTime pattern="dd/MMM/yyyy" locale="#{loginBean.locale}"/>
+                            </h:outputText>
+                        </h2>
+                        <p:panelGrid columns="6" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:outputLabel value="#{m.numeroFaturamento}" for="numero"/>
+                            <p:inputText value="#{faturamentoEditBean.faturamento.numero}"
+                                         id="numero" readonly="#{faturamentoEditBean.statusFaturamentoEnum.equals(StatusFaturamentoEnum.FECHADO)}"
+                                         placeholder="#{m.numeroFaturamento}"
+                                         required="true"
+                                         onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;">
+                                <f:convertNumber integerOnly="true" groupingUsed="false"/>
+                            </p:inputText>
+                            <p:outputLabel value="#{m.dataDoRecebimento}" for="vencimento"/>
+                            <p:calendar value="#{faturamentoEditBean.faturamento.dataVencimento}"
+                                        id="vencimento"
+                                        placeholder="#{m.dataDoRecebimento}" navigator="true"
+                                        locale="#{loginBean.locale}"  rendered="#{isFaturamentoAberto}"
+                                        readonlyInput="true"
+                                        pattern="dd/MM/yyyy"
+                                        mindate="#{faturamentoEditBean.faturamento.fim}"
+                                        mask="true">
+                                <p:ajax event="dateSelect" update="buttons"/>
+                            </p:calendar>
+
+
+                            <h:outputText value="#{faturamentoEditBean.faturamento.dataVencimento}" rendered="#{!isFaturamentoAberto}">
+                                <f:convertDateTime pattern="dd/MMM/yyyy" locale="#{loginBean.locale}"/>
+                            </h:outputText>
+
+                            <p:outputLabel value="#{m.dataDeCriacao}" for="dtCriacao" style="font-weight: bold"/>
+                            <h:outputText value="#{faturamentoEditBean.faturamento.createdAt}" id="dtCriacao">
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>
+                            </h:outputText>
+
+                            <p:outputLabel value="#{m.consultorio}" for="consultorio" style="font-weight: bold"/>
+                            <h:outputText value="#{faturamentoEditBean.faturamento.consultorio.nome}"
+                                          id="consultorio"/>
+
+                            <p:outputLabel value="#{m.convenio}" for="convenio" style="font-weight: bold"/>
+                            <h:outputText value="#{faturamentoEditBean.faturamento.convenio.nome}" id="convenio"/>
+
+                            <p:outputLabel value="#{m.total}" for="total" style="font-weight: bold"/>
+                            <h:outputText value="#{faturamentoEditBean.faturamento.valor}" id="total">
+                                <f:convertNumber type="currency" currencySymbol="R$"/>
+                            </h:outputText>
+                        </p:panelGrid>
+
+                    </div>
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                        <p:dataTable id="dataTable" var="fatura" value="#{faturamentoEditBean.faturaList}"
+                                     selection="#{faturamentoEditBean.faturaListSelected}"
+                                     rowKey="#{fatura.id}"
+                                     rows="10"
+                                     paginator="true"
+                                     paginatorPosition="bottom"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="10,15,20,30"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <p:column selectionMode="multiple" style="width:16px;" rendered="#{!faturamentoEditBean.faturamento.finalizado}"/>
+                            <f:facet name="header">
+                                <h:outputText value="#{m.faturas}"/>
+                            </f:facet>
+                            <p:column headerText="#{m.numerofatura}">
+                                <h:outputText value="#{fatura.numero}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.paciente}">
+                                <h:outputText value="#{fatura.paciente.usuario.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.dataDaFatura}">
+                                <h:outputText value="#{fatura.createdAt}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="#{m.tipoDaFatura}">
+                                <h:outputText value="#{fatura.tipoFatura.tipo}"/>
+                            </p:column>
+                            <p:column headerText="#{m.status}">
+                                <h:outputText value="#{fatura.statusFatura.status}"/>
+                            </p:column>
+                            <p:column headerText="#{m.total}">
+                                <h:outputText value="#{fatura.valor}">
+                                    <f:convertNumber type="currency" currencySymbol="R$ "/>
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="#{m.editar}">
+                                <h:outputLink value="../fatura/editar.xhtml?faturaId=#{fatura.id}">
+                                    <i class="fa fa-pencil"/>
+                                </h:outputLink>
+                            </p:column>
+                        </p:dataTable>
+                        <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group">
+                            <p:commandButton value="#{m.removerFaturasSelecionadas}" rendered="#{faturamentoEditBean.statusFaturamentoEnum.equals(StatusFaturamentoEnum.ABERTO) and permissaoRemoverFatura}"
+                                             actionListener="#{faturamentoEditBean.removeFaturasFromFaturamento}"
+                                             update="dataTable buttons" style="background-color: red"/>
+                        </p:panelGrid>
+                    </div>
+                    <div class="card">
+                        <p:panelGrid columns="4" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:button value="#{m.cancelar}" outcome="faturamento.xhtml">
+                                <f:param name="inicio" value="#{faturamentoEditBean.inicio}"/>
+                                <f:param name="fim" value="#{faturamentoEditBean.fim}"/>
+                                <f:param name="status" value="#{faturamentoEditBean.statusFaturamentoParam}"/>
+                            </p:button>
+
+                            <p:button value="#{m.adicionarFaturas}" outcome="faturasFaturamento.xhtml" rendered="#{faturamentoEditBean.statusFaturamentoEnum.equals(StatusFaturamentoEnum.ABERTO)}">
+                                <f:param name="inicio" value="#{faturamentoEditBean.inicio}"/>
+                                <f:param name="faturamentoDisponivel" value="#{faturamentoEditBean.faturamento.id}"/>
+                                <f:param name="fim" value="#{faturamentoEditBean.fim}"/>
+                                <f:param name="status" value="#{faturamentoEditBean.statusFaturamentoParam}"/>
+                                <f:param name="convenio" value="#{faturamentoEditBean.faturamento.convenio.id}"/>
+                            </p:button>
+
+                            <p:commandButton value="#{m.atualizar}" action="#{faturamentoEditBean.update}" rendered="#{faturamentoEditBean.statusFaturamentoEnum.equals(StatusFaturamentoEnum.ABERTO)}">
+                                <p:confirm header="#{m.desejaAtualizarFaturamento}"
+                                           message="#{m.confirmaEstaAcao}"
+                                           icon="ui-icon-alert"/>
+                            </p:commandButton>
+
+                            <h:panelGroup id="buttons">
+                                    <p:commandButton value="#{m.fecharFaturamento}"
+                                                     action="#{faturamentoEditBean.closeFaturamento()}" rendered="#{faturamentoEditBean.statusFaturamentoEnum.equals(StatusFaturamentoEnum.ABERTO) and permissaoFecharFaturamento}"
+                                                     disabled="#{faturamentoEditBean.faturaList.size() == 0 and !faturamentoEditBean.faturamento.finalizado || faturamentoEditBean.faturamento.dataVencimento == null}">
+                                        <p:confirm header="#{m.desejaFecharFaturamento}"
+                                                   message="#{m.confirmaEstaAcao}"
+                                                   icon="ui-icon-alert"/>
+                                    </p:commandButton>
+
+                            </h:panelGroup>
+                        </p:panelGrid>
+                    </div>
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                  oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 5000)"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="#{m.sim}" type="button" styleClass="ui-confirmdialog-yes"
+                                         icon="ui-icon-check"/>
+                        <p:commandButton value="#{m.nao}" type="button" styleClass="ui-confirmdialog-no"
+                                         icon="ui-icon-close"/>
+                    </p:confirmDialog>
+                </h:form>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

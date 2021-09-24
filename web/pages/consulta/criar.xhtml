@@ -1,0 +1,317 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui"
+                xmlns:df="http://br.com.devdojo/functions"
+                xmlns:of="http://omnifaces.org/functions" xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.agendarConsulta}</ui:define>
+    <f:metadata>
+
+        <f:viewParam name="consultorioId" value="#{consultaRegisterBean.consultorioId}"
+                     required="#{!facesContext.postback}"
+                     requiredMessage="#{m.requiredParams}"/>
+        <f:viewParam name="especialidadeId" value="#{consultaRegisterBean.especialidadeId}"
+                     required="#{!facesContext.postback}"
+                     requiredMessage="#{m.requiredParams}"/>
+        <f:viewParam name="agendaId" value="#{consultaRegisterBean.agendaId}" required="#{!facesContext.postback}"
+                     requiredMessage="#{m.requiredParams}"/>
+        <f:viewParam name="especialistaId" value="#{consultaRegisterBean.especialistaId}"
+                     required="#{!facesContext.postback}"
+                     requiredMessage="#{m.requiredParams}"/>
+        <f:viewParam name="dataBuscaInicio" value="#{consultaRegisterBean.dataBuscaInicio}"
+                     converter="dateToStringDDMMYYYYConverter" required="#{!facesContext.postback}"
+                     requiredMessage="#{m.requiredParams}"/>
+        <f:viewParam name="dataBuscaFim" value="#{consultaRegisterBean.dataBuscaFim}"
+                     converter="dateToStringDDMMYYYYConverter" required="#{!facesContext.postback}"
+                     requiredMessage="#{m.requiredParams}"/>
+        <f:viewParam name="diaHoraInicio" value="#{consultaRegisterBean.diaHoraInicio}"
+                     converter="dateToStringYYYMMDDHHMMConverter" required="#{!facesContext.postback}"
+                     requiredMessage="#{m.requiredParams}"/>
+        <f:viewParam name="diaHoraFim" value="#{consultaRegisterBean.diaHoraFim}"
+                     converter="dateToStringYYYMMDDHHMMConverter" required="#{!facesContext.postback}"
+                     requiredMessage="#{m.requiredParams}"/>
+        <f:viewAction action="#{consultaRegisterBean.init}"
+                      if="#{not empty consultaRegisterBean.consultorioId and not empty consultaRegisterBean.especialistaId}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <o:importConstants type="br.com.devdojo.projetoinicial.persistence.model.enums.TipoConsulta"/>
+        <c:set value="EEEEEEEE, dd 'de' MMMM 'de' yyyy" var="diaPattern"/>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.agendamento}"
+                                    url="../agendamento/#{consultaRegisterBean.backURL}"/>
+                        <p:menuitem value="#{m.agendarConsulta}" url="#" styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+
+                <o:form id="form">
+
+                    <div class="card">
+                        <h:outputLink
+                                value="../agendamento/#{consultaRegisterBean.backURL}">#{m.agendamento}</h:outputLink>
+                    </div>
+                    <div class="card">
+                        <h:outputFormat value="#{m.tituloCadastrarConsulta}">
+                            <f:param value="#{consultaRegisterBean.especialista.nome}"/>
+                            <f:param value="#{consultaRegisterBean.consultorio.nome}"/>
+                            <f:param value="#{of:formatDate(consultaRegisterBean.diaHoraInicio,'dd/MM/yyyy HH:mm')}"/>
+                            <f:param value="#{of:formatDate(consultaRegisterBean.diaHoraFim,'dd/MM/yyyy HH:mm')}"/>
+                        </h:outputFormat>
+                        <h4>#{m.buscarPaciente}</h4>
+                        <h:panelGroup id="pacienteFields">
+                            <p:panelGrid columns="5" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                                <p:inputMask value="#{consultaRegisterBean.paciente.usuario.cpf}" id="cpf"
+                                             placeholder="CPF"
+                                             mask="999.999.999-99"
+                                             readonly="#{consultaRegisterBean.consulta.paciente != null and not empty consultaRegisterBean.paciente.usuario.cpf}"/>
+                                <p:calendar value="#{consultaRegisterBean.paciente.usuario.birthday}" id="nascimento"
+                                            placeholder="Data de nascimento" pattern="dd/MM/yyyy" mask="true"/>
+                                <p:inputText value="#{consultaRegisterBean.paciente.usuario.nome}" id="nome"
+                                             placeholder="Nome"/>
+                                <p:inputMask value="#{consultaRegisterBean.paciente.usuario.celular}" id="celular"
+                                             placeholder="Celular" mask="(99)99999-9999">
+                                    <f:validateLength minimum="9" ></f:validateLength>
+                                </p:inputMask>
+                                <p:inputMask value="#{consultaRegisterBean.paciente.usuario.telefoneResidencia}"
+                                             id="telefone" placeholder="telefone" mask="(99)9999-9999"/>
+                                <h:outputLabel value="Um novo usuário será criado!" style="color: darkred" rendered="#{consultaRegisterBean.novoUsuario}"/>
+                            </p:panelGrid>
+                        </h:panelGroup>
+                        <p:panelGrid columns="6" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:commandButton value="Buscar" id="btnBuscar" disabled="#{consultaRegisterBean.novoUsuario}"
+                                             actionListener="#{consultaRegisterBean.searchUsuarios}"
+                                             update="pacienteFields form-dataTable btnNewUser"/>
+                            <p:commandButton value="Limpar"
+                                             actionListener="#{consultaRegisterBean.clearSearchFields}"
+                                             update="pacienteFields form btnNewUser btnBuscar "/>
+                            <p:commandButton value="Cadastrar novo usuário" id="btnNewUser"
+                                             actionListener="#{consultaRegisterBean.registerNewUser}" disabled="#{consultaRegisterBean.btnNovoUsuario}"
+                                             update="pacienteFields form-dataTable btnBuscar"/>
+                        </p:panelGrid>
+
+                    </div>
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+
+                        <p:dataTable id="dataTable" var="usuario" value="#{consultaRegisterBean.usuarioList}"
+                                     paginator="true"
+                                     rows="5"
+                                     paginatorPosition="bottom"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     rowKey="#{usuario.id}"
+                                     rowSelectMode="single"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <p:ajax event="rowSelectRadio" listener="#{consultaRegisterBean.rowSelected}"
+                                    update="form-pacienteFields"/>
+                            <p:column selectionMode="single"/>
+                            <f:facet name="header">
+                                <h:outputText value="#{m.pacientes}"/>
+                            </f:facet>
+                            <p:column headerText="Nome">
+                                <h:outputText value="#{usuario.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="Aniversário">
+                                <h:outputText value="#{usuario.birthday}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="CPF">
+                                <h:outputText value="#{usuario.cpf}"/>
+                            </p:column>
+
+                            <p:column headerText="RG">
+                                <h:outputText value="#{usuario.rg}"/>
+                            </p:column>
+                            <p:column headerText="Celular">
+                                <h:outputText value="#{usuario.celular}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                    <div class="card">
+                        <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <h:outputLabel value="#{m.especialidade}" for="especialidade"/>
+                            <p:selectOneMenu id="especialidade"
+                                             value="#{consultaRegisterBean.consulta.especialidade}"
+                                             required="true" requiredMessage="Selecione uma especialidade"
+                                             converter="entityConverter">
+                                <f:selectItems var="especialidade" itemValue="#{especialidade}"
+                                               itemLabel="#{especialidade.especialidade}"
+                                               value="#{consultaRegisterBean.especialidadeList}"/>
+                            </p:selectOneMenu>
+
+                            <h:outputLabel value="#{m.convenio}" for="convenio"/>
+                            <p:selectOneMenu id="convenio" value="#{consultaRegisterBean.consulta.convenio}"
+                                             converter="entityConverter"
+                                             filter="true" filterMatchMode="contains">
+                                <f:selectItem itemValue="#{null}" itemLabel="Selecione um convênio"/>
+                                <f:selectItems var="convenio" itemValue="#{convenio}"
+                                               itemLabel="#{convenio.nome}"
+                                               value="#{consultaRegisterBean.convenioList}"/>
+                                <p:ajax listener="#{consultaRegisterBean.loadTipoDeProcedimentosDoConvenio}"
+                                        update="tipoProcedimento procedimento sessaoGroup guiaPorSessaoGroup"/>
+                            </p:selectOneMenu>
+
+                            <h:outputLabel value="#{m.tipoProcedimento}" for="tipoProcedimento"/>
+                            <p:selectOneMenu id="tipoProcedimento" value="#{consultaRegisterBean.tipoProcedimento}"
+                                             converter="entityConverter">
+                                <f:selectItem itemValue="#{null}" itemLabel="Selecione o tipo do procedimento"/>
+                                <f:selectItems var="tipoProcedimento" itemValue="#{tipoProcedimento}"
+                                               itemLabel="#{tipoProcedimento.tipo}"
+                                               value="#{consultaRegisterBean.tipoProcedimentoList}"/>
+                                <p:ajax listener="#{consultaRegisterBean.loadProcedimentosBaseadosNoTipoDoProcedimentoDoConvenio}"
+                                        update="procedimento sessaoGroup guiaPorSessaoGroup"/>
+                            </p:selectOneMenu>
+                            <h:outputLabel value="#{m.procedimento}" for="procedimento"/>
+                            <p:selectOneMenu id="procedimento" value="#{consultaRegisterBean.procedimento}"
+                                             converter="entityConverter">
+                                <f:selectItem itemValue="#{null}" itemLabel="Selecione um procedimento"/>
+                                <f:selectItems var="procedimento" itemValue="#{procedimento}"
+                                               itemLabel="#{procedimento.nome}"
+                                               value="#{consultaRegisterBean.procedimentoList}"/>
+                                <p:ajax listener="#{consultaRegisterBean.loadProcedimentoEspecialista}"/>
+                            </p:selectOneMenu>
+
+                        </p:panelGrid>
+                        <h:panelGroup id="guiaPorSessaoGroup">
+                            <c:set var="tipoProcedimentoSessao" value="#{consultaRegisterBean.tipoProcedimento.id == 2}"/>
+                            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                                <h:outputLabel value="#{m.consultaRetorno}" for="consultaRetorno"
+                                               rendered="#{!tipoProcedimentoSessao}"/>
+                                <p:selectOneMenu id="consultaRetorno"
+                                                 rendered="#{!tipoProcedimentoSessao}"
+                                                 value="#{consultaRegisterBean.consultaRetorno}">
+                                    <f:selectItem itemValue="#{false}" itemLabel="#{m.nao}"/>
+                                    <f:selectItem itemValue="#{true}" itemLabel="#{m.sim}"/>
+                                </p:selectOneMenu>
+                                <h:outputLabel value="#{m.guiaPorSessao}" for="unicaGuia"
+                                               rendered="#{tipoProcedimentoSessao}"/>
+                                <p:selectOneMenu id="unicaGuia"
+                                                 value="#{consultaRegisterBean.unicaGuiaSessao}"
+                                                 rendered="#{tipoProcedimentoSessao}"
+                                                 required="true"
+                                                 requiredMessage="Selecione se as sessões possuem uma ou mais guias">
+                                    <f:selectItem itemValue="#{null}" itemLabel="Mais de uma guia por sessão?"/>
+                                    <f:selectItem itemValue="#{false}" itemLabel="#{m.nao}"/>
+                                    <f:selectItem itemValue="#{true}" itemLabel="#{m.sim}"/>
+                                    <p:ajax update="sessaoGroup"/>
+                                </p:selectOneMenu>
+                            </p:panelGrid>
+                        </h:panelGroup>
+                        <h:panelGroup id="sessaoGroup">
+                            <p:messages id="messages2" showDetail="false" autoUpdate="true" closable="true"/>
+                            <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         rendered="#{tipoProcedimentoSessao}">
+                                <h:outputLabel value="Selecione os dias e horários das sessões"/>
+
+                            </p:panelGrid>
+                            <p:panelGrid columns="5" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         rendered="#{tipoProcedimentoSessao}">
+                                <p:selectOneMenu value="#{consultaRegisterBean.agendaSessao}" id="dia" converter="entityConverter">
+                                    <f:selectItem itemValue="#{null}" itemLabel="Selecione um dia"/>
+                                    <f:selectItems var="agenda" value="#{consultaRegisterBean.agendaList}"
+                                                   itemLabel="#{of:formatDate(agenda.dataInicio, diaPattern)}"
+                                                   itemValue="#{agenda}"/>
+                                    <p:ajax event="change" listener="#{consultaRegisterBean.onChangeAgendaDialog}"
+                                            process="@this" update="horario sessaoGroup"/>
+                                </p:selectOneMenu>
+
+                                <p:selectOneMenu value="#{consultaRegisterBean.agendaHorarioSessao}" id="horario"
+                                                 converter="searchDTOConverter">
+                                    <f:selectItems var="search" value="#{consultaRegisterBean.agendaHorariosModalList}"
+                                                   itemLabel="#{of:formatDate(search.diaInicio, 'HH:mm')} - #{of:formatDate(search.diaFim, 'HH:mm')}"
+                                                   itemValue="#{search}"/>
+                                    <p:ajax event="change" process="@this" immediate="true"/>
+                                </p:selectOneMenu>
+
+                                <p:commandButton id="btnAdd" value="#{m.adicionar}" actionListener="#{consultaRegisterBean.adicionarSessao}"
+                                                 update="form-sessaoGroup" disabled="#{consultaRegisterBean.agendaSessao == null}"/>
+
+                            </p:panelGrid>
+                            <div class="ui-lg-4">
+                                <p:dataTable value="#{consultaRegisterBean.agendaHorariosSessaoList}" var="agendaHorarioSessao"
+                                             tableStyle="text-align: center; table-layout: auto;" rendered="#{tipoProcedimentoSessao}"
+                                             reflow="true">
+                                    <p:column headerText="#{m.horarios}">
+                                        <h:outputText
+                                                value="#{of:formatDate(agendaHorarioSessao.diaInicio, 'dd/MM/yyyy')} - #{df:formatTwoDates(agendaHorarioSessao.diaInicio, agendaHorarioSessao.diaFim,'HH:mm')}"/>
+                                    </p:column>
+                                    <p:column headerText="#{m.remover}">
+                                        <p:commandLink
+                                                actionListener="#{consultaRegisterBean.removerSessao(agendaHorarioSessao)}"
+                                                update="form-sessaoGroup" immediate="true">
+                                            <i class="fa fa-trash-o"/>
+                                        </p:commandLink>
+                                    </p:column>
+
+                                </p:dataTable>
+                            </div>
+                        </h:panelGroup>
+                    </div>
+
+                    <div class="card">
+                        <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <h:outputLink value="../agendamento/#{consultaRegisterBean.backURL}">
+                                <p:button value="#{m.cancelar}"/>
+                            </h:outputLink>
+
+
+                            <p:commandButton id="btnCadastrar" value="#{m.cadastrarConsulta}"
+                                             action="#{consultaRegisterBean.save}">
+                            </p:commandButton>
+
+
+
+                        </p:panelGrid>
+                    </div>
+                </o:form>
+            </div>
+        </div>
+        <!--
+       <h:outputScript name="js/socket.io.js" library="atlantis-layout" target="body"/>
+
+       <h:form id="socketForm">
+           <h:inputHidden id="dateSocket" value="#{consultaRegisterBean.dataSocketFormat}" />
+           <h:inputHidden id="idSocket" value="#{consultaRegisterBean.agendaId}" />
+       </h:form>
+       <script type="text/javascript">
+
+           $(document).ready(function() {
+               document.getElementById("socketForm-dateSocket").value;
+               var urlHref = window.location.href;
+               window.localStorage.setItem("urlAbsoluta", urlHref);
+               var socket = io.connect('https://murmuring-chamber-91453.herokuapp.com/');
+               var dateSock = document.getElementById("socketForm-dateSocket").value;
+               var idSock = document.getElementById("socketForm-idSocket").value;
+               socket.emit("agendando",  dateSock, idSock);
+                   console.log(dateSock);
+                   console.log(socket);
+                   return false;
+           });
+       </script>
+       !-->
+
+        <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                      oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 10000)"/>
+        <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                  showHeader="false">
+            <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+        </p:dialog>
+    </ui:define>
+</ui:composition>

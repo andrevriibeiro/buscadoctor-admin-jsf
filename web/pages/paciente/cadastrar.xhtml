@@ -1,0 +1,312 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.criarPaciente}</ui:define>
+
+    <f:metadata>
+        <f:viewAction action="#{pacienteRegisterBean.init}"/>
+    </f:metadata>
+
+    <ui:define name="content">
+        <p:importEnum type="br.com.devdojo.projetoinicial.persistence.model.enums.EstadoCivil" var="EstadoCivil"
+                      allSuffix="ALL_ENUM_VALUES"/>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.paciente}" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.criarPaciente}" url="/pages/paciente/cadastrar.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form>
+                    <h1>
+                        <h:outputText value="#{m.criarPaciente}"/>
+                    </h1>
+
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <o:form id="form2" includeRequestParams="true" includeViewParams="true">
+                    <p:messages id="meee" showDetail="true" autoUpdate="true" closable="true"/>
+                    <div class="card">
+                        <h4>#{m.buscarUsuario}</h4>
+                        <o:validateOneOrMore id="oneOrMore" components="searchCpf searchNome searchNasc searchCell searchPhone"
+                                             message="#{m.warningFillAtLeastOneField}"/>
+                            <h:panelGroup id="pacienteFields">
+                                <p:panelGrid columns="5" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                                    <p:inputMask value="#{pacienteRegisterBean.paciente.usuario.cpf}" id="searchCpf"
+                                                 placeholder="CPF"
+                                                 mask="999.999.999-99"
+                                                 readonly="#{pacienteRegisterBean.paciente.usuario.cpf}"/>
+                                    <p:calendar value="#{pacienteRegisterBean.paciente.usuario.birthday}" id="searchNasc"
+                                                placeholder="Data de nascimento" pattern="dd/MM/yyyy" mask="true"/>
+                                    <p:inputText value="#{pacienteRegisterBean.paciente.usuario.nome}" id="searchNome"
+                                                 placeholder="Nome"/>
+                                    <p:inputMask value="#{pacienteRegisterBean.paciente.usuario.celular}" id="searchCell"
+                                                 mask="(99)99999-9999" placeholder="Celular"/>
+                                    <p:inputMask value="#{pacienteRegisterBean.paciente.usuario.telefoneResidencia}"
+                                                 id="searchPhone" placeholder="telefone" mask="(99)9999-9999"/>
+                                    <!--<h:outputLabel value="Um novo usuário será criado!" style="color: darkred" rendered="#{pacienteRegisterBean.novoUsuario}"/>-->
+                                </p:panelGrid>
+                            </h:panelGroup>
+                        <p:panelGrid columns="6" layout="grid" styleClass="ui-panelgrid-blank form-group">
+
+                            <p:commandButton value="Buscar" id="btnBuscar"
+                                             actionListener="#{pacienteRegisterBean.searchUsuarios}"
+                                             update="pacienteFields form3-dataTa btnNewUser"/>
+                            <p:commandButton value="Limpar" action="#{pacienteRegisterBean.clearSearchFields}"/>
+                            <p:commandButton value="Cadastrar novo usuário" id="btnNewUser"
+                                             disabled="#{pacienteRegisterBean.novoUsuario}"
+                                             actionListener="#{pacienteRegisterBean.newUserPressed}"
+                                             update="pacienteFields form3-dataTa btnBuscar"/>
+                        </p:panelGrid>
+                    </div>
+                </o:form>
+
+                <o:form id="form3" includeRequestParams="true" includeViewParams="true">
+                    <div class="card">
+                        <p:dataTable id="dataTa" var="usuario" value="#{pacienteRegisterBean.usuarioList}"
+                                     paginator="true"
+                                     rows="5"
+                                     paginatorPosition="bottom"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     rowKey="#{usuario.id}"
+                                     rowSelectMode="single"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <p:ajax event="rowSelectRadio" listener="#{pacienteRegisterBean.rowSelected}"
+                                    update="form2-pacienteFields"/>
+                            <p:column selectionMode="single"/>
+                            <f:facet name="header">
+                                <h:outputText value="#{m.pacientes}"/>
+                            </f:facet>
+                            <p:column headerText="Nome">
+                                <h:outputText value="#{usuario.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="Nascimento">
+                                <h:outputText value="#{usuario.birthday}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="CPF">
+                                <h:outputText value="#{usuario.cpf}"/>
+                            </p:column>
+
+                            <p:column headerText="Celular">
+                                <h:outputText value="#{usuario.celular}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </o:form>
+
+                <h:form id="form">
+                    <div class="card" id="dadospaciente">
+                        <div class="card card-w-title">
+                            <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                                <p:outputLabel value="Nome completo" for="nome"/>
+                                <p:inputText value="#{pacienteRegisterBean.paciente.usuario.nome}" id="nome"
+                                             placeholder="Nome do Paciente" required="true"
+                                             readonly="#{pacienteRegisterBean.isEnableFields()}"
+                                             requiredMessage="#{m.requiredNome}"/>
+
+                                <p:outputLabel value="E-mail" for="email"/>
+                                <p:inputText value="#{pacienteRegisterBean.paciente.usuario.email}" id="email"
+                                             placeholder="E-mail" required="false" readonly="#{pacienteRegisterBean.isEnableFields()}"/>
+
+                                <h:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                                    <p:selectOneRadio id="sexo" value="#{pacienteRegisterBean.paciente.usuario.sexo}"
+                                                      disabled="#{pacienteRegisterBean.isEnableFields()}" required="true"
+                                                      requiredMessage="#{m.requiredSexo}">
+                                        <f:selectItem itemLabel="Masculino" itemValue="Masculino"/>
+                                        <f:selectItem itemLabel="Feminino" itemValue="Feminino"/>
+                                    </p:selectOneRadio>
+                                </h:panelGrid>
+
+                                <p:outputLabel value="Data de nascimento" for="nascimento"/>
+                                <p:calendar value="#{pacienteRegisterBean.paciente.usuario.birthday}"
+                                            id="nascimento" required="true" requiredMessage="#{m.requiredBirthday}"
+                                            placeholder="Data de nascimento" navigator="true" pattern="dd/MM/yyyy"
+                                            mask="true"
+                                            disabled="#{pacienteRegisterBean.isEnableFields()}"/>
+
+                                <p:outputLabel value="CPF" for="cpf"/>
+                                <p:inputMask value="#{pacienteRegisterBean.paciente.usuario.cpf}" id="cpf"
+                                             placeholder="CPF"
+                                             mask="999.999.999-99"
+                                             readonly="#{pacienteRegisterBean.isEnableFields()}"/>
+
+                                <p:outputLabel value="RG" for="rg"/>
+                                <p:inputText value="#{pacienteRegisterBean.paciente.usuario.rg}" id="rg"
+                                             placeholder="RG"
+                                             readonly="#{pacienteRegisterBean.isEnableFields()}"/>
+
+                                <p:outputLabel value="Telefone Celular" for="celular"/>
+                                <p:inputMask value="#{pacienteRegisterBean.paciente.usuario.celular}" id="celular"
+                                             placeholder="Celular" required="false" mask="(99)99999-9999"
+                                             readonly="#{pacienteRegisterBean.isEnableFields()}">
+                                    <f:validateLength minimum="9" ></f:validateLength>
+                                </p:inputMask>
+
+                                <p:outputLabel value="Telefone Residencial" for="residencial"/>
+                                <p:inputMask value="#{pacienteRegisterBean.paciente.usuario.telefoneResidencia}"
+                                             id="residencial" placeholder="Telefona Residencial" required="false"
+                                             mask="(99)9999-9999" readonly="#{pacienteRegisterBean.isEnableFields()}"/>
+
+                                <p:outputLabel value="Telefone Recado" for="recado"/>
+                                <p:inputMask value="#{pacienteRegisterBean.paciente.usuario.telefoneRecado}"
+                                             id="recado" placeholder="Telefona para Recado" required="false"
+                                             mask="(99)9999-9999" readonly="#{pacienteRegisterBean.isEnableFields()}"/>
+
+                                <p:outputLabel value="Estado Cívil" for="civil"/>
+                                <p:selectOneMenu id="civil" value="#{pacienteRegisterBean.paciente.usuario.estadoCivil}"
+                                                 style="width:150px" disabled="#{pacienteRegisterBean.isEnableFields()}">
+                                    <f:selectItem itemLabel="Opcão" itemValue=""/>
+                                    <f:selectItem itemLabel="SOLTEIRO" itemValue="SOLTEIRO"/>
+                                    <f:selectItem itemLabel="CASADO" itemValue="CASADO"/>
+                                    <f:selectItem itemLabel="VÍUVO" itemValue="VÍUVO"/>
+                                    <f:selectItem itemLabel="SEPARADO" itemValue="SEPARADO"/>
+                                </p:selectOneMenu>
+                            </p:panelGrid>
+
+                            <!--
+                            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                                <p:inputMask value="#{pacienteRegisterBean.paciente.usuario.logradouro.cep}" id="cep"
+                                             placeholder="Cep" mask="99999-999" binding="#{cepToFind}"
+                                             readonly="#{pacienteRegisterBean.isEnableFields()}"/>
+
+                                <p:commandButton value="#{m.buscarCep}"
+                                                 action="#{pacienteRegisterBean.findCep(cepToFind.value)}"
+                                                 disabled="#{pacienteRegisterBean.isEnableFields()}">
+                                </p:commandButton>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         style="width: 60%">
+                                <p:inputText readonly="true" id="tipoLog" placeholder="tipo do logradouro"
+                                             value="#{pacienteRegisterBean.paciente.usuario.logradouro.tipo}"/>
+
+                                <p:inputText readonly="true" id="log" placeholder="Endereço"
+                                             value="#{pacienteRegisterBean.paciente.usuario.logradouro.nome}"/>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         style="width: 60%">
+                                <p:inputText id="numero" placeholder="numero"
+                                             value="#{pacienteRegisterBean.paciente.usuario.numero}">
+                                    <f:convertNumber integerOnly="true" groupingUsed="false"/>
+                                </p:inputText>
+
+                                <p:inputText id="comp" placeholder="complemento"
+                                             value="#{pacienteRegisterBean.paciente.usuario.complemento}"/>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+
+                                <p:inputText readonly="true" id="bairro" placeholder="bairro"
+                                             value="#{pacienteRegisterBean.paciente.usuario.logradouro.bairro}"/>
+
+                                <p:inputText readonly="true" id="cid" placeholder="cidade"
+                                             value="#{pacienteRegisterBean.paciente.usuario.logradouro.cidade.nome}"/>
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                                <p:inputText readonly="true" id="estado" placeholder="estado"
+                                             value="#{pacienteRegisterBean.paciente.usuario.logradouro.cidade.estado.nome}"/>
+                            </p:panelGrid>
+                            -->
+
+                            <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         style="width: 60%">
+
+                                <p:selectOneMenu id="cor" value="#{pacienteRegisterBean.paciente.usuario.cor}"
+                                                 style="width:175px" disabled="#{pacienteRegisterBean.isEnableFields()}">
+                                    <f:selectItem itemLabel="Selecione a Cor ou Raça" itemValue=""/>
+                                    <f:selectItem itemLabel="BRANCA" itemValue="Branca"/>
+                                    <f:selectItem itemLabel="PRETA" itemValue="Preta"/>
+                                    <f:selectItem itemLabel="PARDA" itemValue="Parda"/>
+                                    <f:selectItem itemLabel="INDÍGENA" itemValue="Indígena"/>
+                                    <f:selectItem itemLabel="AMARELA" itemValue="Amarela"/>
+                                </p:selectOneMenu>
+
+                                <p:inputText id="naturalidade" placeholder="naturalidade"
+                                             value="#{pacienteRegisterBean.paciente.usuario.naturalidade}"
+                                             readonly="#{pacienteRegisterBean.isEnableFields()}"/>
+
+                            </p:panelGrid>
+
+                            <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                         style="width: 60%">
+                                <p:outputLabel value="Profissão" for="profissao"/>
+                                <p:inputText value="#{pacienteRegisterBean.paciente.usuario.profissao}" id="profissao"
+                                             placeholder="Profissao" required="false"
+                                             readonly="#{pacienteRegisterBean.isEnableFields()}"/>
+                            </p:panelGrid>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <p:dataTable id="dataTable" value="#{pacienteRegisterBean.usuarioConvenioList}"
+                                     var="usuarioConvenio" reflow="true" resizableColumns="true"
+                                     tableStyle="text-align:center; table-layout: auto" rows="10" paginator="true"
+                                     rowKey="#{usuarioConvenio.id}" paginatorPosition="bottom" rowsPerPageTemplate="5,10,15"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks}
+                                             {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+                            <f:facet name="header">
+                                <h:outputText value="#{m.conveniosPaciente}"/>
+                            </f:facet>
+
+                            <p:column headerText="Convenio">
+                                <h:outputText value="#{usuarioConvenio.convenio.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="Número">
+                                <h:outputText value="#{usuarioConvenio.numero}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+
+                    <br/>
+
+                    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                    <p:panelGrid columns="3" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                        <p:commandButton value="#{m.cancelar}" onclick="window.history.back();"/>
+
+                        <p:commandButton value="#{m.salvar}" action="#{pacienteRegisterBean.createUsuarioPaciente}"
+                                         disabled="#{pacienteRegisterBean.isEnableFields()}"/>
+                    </p:panelGrid>
+
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                </h:form>
+            </div>
+        </div>
+
+        <script type="application/javascript">
+            $('#form-celular').mask('(99)99999-9999');
+            $('#form2-searchCell').mask('(99)99999-9999');
+        </script>
+
+    </ui:define>
+</ui:composition>

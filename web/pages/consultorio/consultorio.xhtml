@@ -1,0 +1,145 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.consultorio}</ui:define>
+    <f:metadata>
+        <f:viewAction action="#{consultorioBean.init}"/>
+    </f:metadata>
+    <ui:define name="content">
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.consultorio}" url="/pages/consultorio/consultorio.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form>
+                    <p:tabMenu activeIndex="#{param.i}">
+                        <p:menuitem value="Consultorio" outcome="/pages/consultorio/consultorio" icon="fa fa-fw fa-cog">
+                            <f:param name="i" value="0"/>
+                        </p:menuitem>
+                        <p:menuitem value="Usuarios" outcome="/pages/consultorio/perfilpermissaolist" icon="fa fa-fw fa-user">
+                            <f:param name="i" value="1"/>
+                        </p:menuitem>
+                        <p:menuitem value="#{m.convenios}" outcome="/pages/consultorio/convenio"
+                                    icon="fa fa-fw fa-plus-square">
+                            <f:param name="i" value="2"/>
+                        </p:menuitem>
+                    </p:tabMenu>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <div class="card">
+                    <h:form id="form">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                        <div class="card card-w-title">
+                            <h1>#{m.editarConsultorio}</h1>
+                            <p:panelGrid columns="1" styleClass="ui-panelgrid-blank form-group" style="width: 60%">
+                                <p:outputLabel>Nome</p:outputLabel>
+                                <p:inputText value="#{consultorioBean.consultorio.nome}"
+                                             required="true" requiredMessage="#{m.requiredNomeConsultorio}"/>
+
+                                <p:outputLabel>Telefone</p:outputLabel>
+                                <p:inputMask value="#{consultorioBean.consultorio.telefone}"
+                                             mask="(99)9999-9999"
+                                             required="true" requiredMessage="#{m.requiredTelefone}"/>
+
+                                <p:outputLabel>Tipo</p:outputLabel>
+                                <p:inputText value="#{consultorioBean.consultorio.tipo.nome}"
+                                             readonly="true"/>
+
+                                <p:outputLabel>CNPJ</p:outputLabel>
+                                <p:inputText value="#{consultorioBean.consultorio.cnpj}"
+                                             required="true" requiredMessage="#{m.requiredCnpj}"/>
+
+                                <p:outputLabel>Razão Social</p:outputLabel>
+                                <p:inputText value="#{consultorioBean.consultorio.razaoSocial}"/>
+
+                                <p:outputLabel>E-mail</p:outputLabel>
+                                <p:inputText value="#{consultorioBean.consultorio.email}"/>
+
+                                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                             style="width: 100%">
+                                    <p:inputMask value="#{consultorioBean.consultorio.logradouro.cep}" id="cep"
+                                                 placeholder="CEP"
+                                                 mask="99999-999"
+                                                 required="true" requiredMessage="#{m.requiredLogradouro}"/>
+                                    <p:commandButton value="#{m.buscarCep}"
+                                                     action="#{consultorioBean.findCep}"
+                                                     update="tipoLogradouro logradouro bairro cid estado">
+                                    </p:commandButton>
+                                </p:panelGrid>
+
+                                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                             style="width: 100%">
+                                    <p:inputText id="tipoLogradouro" disabled="true" placeholder="Tipo do Logradouro"
+                                                 value="#{consultorioBean.consultorio.logradouro.tipo}"/>
+                                    <p:inputText id="logradouro" readonly="true" placeholder="Logradouro"
+                                                 value="#{consultorioBean.consultorio.logradouro.nome}"/>
+                                </p:panelGrid>
+
+                                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank form-group"
+                                             style="width: 100%">
+                                    <p:inputText id="numero" placeholder="numero"
+                                                 value="#{consultorioBean.consultorio.numero}">
+                                        <f:convertNumber integerOnly="true" groupingUsed="false"/>
+                                    </p:inputText>
+
+                                    <p:inputText id="comp" placeholder="complemento"
+                                                 value="#{consultorioBean.consultorio.complemento}"/>
+                                </p:panelGrid>
+
+                                <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 100%">
+
+                                    <p:inputText id="bairro" placeholder="bairro" readonly="true"
+                                                 value="#{consultorioBean.consultorio.logradouro.bairro}"/>
+
+                                    <p:inputText id="cid" placeholder="cidade" readonly="true"
+                                                 value="#{consultorioBean.consultorio.logradouro.cidade.nome}"/>
+                                </p:panelGrid>
+
+                                <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 100%">
+                                    <p:inputText id="estado" placeholder="estado" readonly="true"
+                                                 value="#{consultorioBean.consultorio.logradouro.cidade.estado.nome}"/>
+                                </p:panelGrid>
+
+                                <br></br>
+
+                                <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group" style="width: 100%">
+                                    <p:button value="#{m.cancelar}" outcome="/pages/paciente/paciente.xhtml"/>
+                                    <p:commandButton id="updateCons" value="#{m.salvar}"
+                                                     action="#{consultorioBean.salvar}"/>
+                                </p:panelGrid>
+                            </p:panelGrid>
+
+                            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                          oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 5000)"/>
+                            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+                            <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false"
+                                      resizable="false"
+                                      showHeader="false">
+                                <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                            </p:dialog>
+                            <p:messages id="msg" showDetail="true" autoUpdate="true" closable="true"/>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>

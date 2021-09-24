@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_projetoincial" default="compile.module.projetoincial">
+  <dirname property="module.projetoincial.basedir" file="${ant.file.module_projetoincial}"/>
+  
+  <property name="module.jdk.home.projetoincial" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.projetoincial" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.projetoincial" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.projetoincial" value="-encoding UTF-8 -source 8 -target 1.8 ${compiler.args}"/>
+  
+  <property name="projetoincial.output.dir" value="${module.projetoincial.basedir}/target/classes"/>
+  <property name="projetoincial.testoutput.dir" value="${module.projetoincial.basedir}/target/test-classes"/>
+  
+  <path id="projetoincial.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="projetoincial.module.production.classpath">
+    <path refid="${module.jdk.classpath.projetoincial}"/>
+    <path refid="library.jboss_10.2.0.final.classpath"/>
+    <path refid="library.maven:_com.sun.faces:jsf-api:2.2.13.classpath"/>
+    <path refid="library.maven:_org.hibernate:hibernate-core:5.0.10.final.classpath"/>
+    <path refid="library.maven:_org.jboss.logging:jboss-logging:3.3.0.final.classpath"/>
+    <path refid="library.maven:_org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.final.classpath"/>
+    <path refid="library.maven:_org.javassist:javassist:3.18.1-ga.classpath"/>
+    <path refid="library.maven:_antlr:antlr:2.7.7.classpath"/>
+    <path refid="library.maven:_org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1.classpath"/>
+    <path refid="library.maven:_org.jboss:jandex:2.0.0.final.classpath"/>
+    <path refid="library.maven:_dom4j:dom4j:1.6.1.classpath"/>
+    <path refid="library.maven:_xml-apis:xml-apis:1.0.b2.classpath"/>
+    <path refid="library.maven:_org.hibernate.common:hibernate-commons-annotations:5.0.1.final.classpath"/>
+    <path refid="library.maven:_org.hibernate:hibernate-entitymanager:5.0.10.final.classpath"/>
+    <path refid="library.maven:_org.hibernate:hibernate-c3p0:5.0.10.final.classpath"/>
+    <path refid="library.maven:_com.mchange:c3p0:0.9.2.1.classpath"/>
+    <path refid="library.maven:_com.mchange:mchange-commons-java:0.2.3.4.classpath"/>
+    <path refid="library.maven:_javax:javaee-api:7.0.classpath"/>
+    <path refid="library.maven:_com.sun.mail:javax.mail:1.5.0.classpath"/>
+    <path refid="library.maven:_javax.activation:activation:1.1.classpath"/>
+    <path refid="library.maven:_mysql:mysql-connector-java:5.1.39.classpath"/>
+    <path refid="library.maven:_org.primefaces:primefaces:6.0.classpath"/>
+  </path>
+  
+  <path id="projetoincial.runtime.production.module.classpath">
+    <pathelement location="${projetoincial.output.dir}"/>
+    <path refid="library.maven:_com.sun.faces:jsf-api:2.2.13.classpath"/>
+    <path refid="library.maven:_org.jboss.logging:jboss-logging:3.3.0.final.classpath"/>
+    <path refid="library.maven:_org.hibernate:hibernate-c3p0:5.0.10.final.classpath"/>
+    <path refid="library.maven:_com.mchange:c3p0:0.9.2.1.classpath"/>
+    <path refid="library.maven:_com.mchange:mchange-commons-java:0.2.3.4.classpath"/>
+    <path refid="library.maven:_mysql:mysql-connector-java:5.1.39.classpath"/>
+    <path refid="library.maven:_org.primefaces:primefaces:6.0.classpath"/>
+  </path>
+  
+  <path id="projetoincial.module.classpath">
+    <path refid="${module.jdk.classpath.projetoincial}"/>
+    <pathelement location="${projetoincial.output.dir}"/>
+    <path refid="library.jboss_10.2.0.final.classpath"/>
+    <path refid="library.maven:_com.sun.faces:jsf-api:2.2.13.classpath"/>
+    <path refid="library.maven:_org.hibernate:hibernate-core:5.0.10.final.classpath"/>
+    <path refid="library.maven:_org.jboss.logging:jboss-logging:3.3.0.final.classpath"/>
+    <path refid="library.maven:_org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.final.classpath"/>
+    <path refid="library.maven:_org.javassist:javassist:3.18.1-ga.classpath"/>
+    <path refid="library.maven:_antlr:antlr:2.7.7.classpath"/>
+    <path refid="library.maven:_org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1.classpath"/>
+    <path refid="library.maven:_org.jboss:jandex:2.0.0.final.classpath"/>
+    <path refid="library.maven:_dom4j:dom4j:1.6.1.classpath"/>
+    <path refid="library.maven:_xml-apis:xml-apis:1.0.b2.classpath"/>
+    <path refid="library.maven:_org.hibernate.common:hibernate-commons-annotations:5.0.1.final.classpath"/>
+    <path refid="library.maven:_org.hibernate:hibernate-entitymanager:5.0.10.final.classpath"/>
+    <path refid="library.maven:_org.hibernate:hibernate-c3p0:5.0.10.final.classpath"/>
+    <path refid="library.maven:_com.mchange:c3p0:0.9.2.1.classpath"/>
+    <path refid="library.maven:_com.mchange:mchange-commons-java:0.2.3.4.classpath"/>
+    <path refid="library.maven:_javax:javaee-api:7.0.classpath"/>
+    <path refid="library.maven:_com.sun.mail:javax.mail:1.5.0.classpath"/>
+    <path refid="library.maven:_javax.activation:activation:1.1.classpath"/>
+    <path refid="library.maven:_mysql:mysql-connector-java:5.1.39.classpath"/>
+    <path refid="library.maven:_org.primefaces:primefaces:6.0.classpath"/>
+  </path>
+  
+  <path id="projetoincial.runtime.module.classpath">
+    <pathelement location="${projetoincial.testoutput.dir}"/>
+    <pathelement location="${projetoincial.output.dir}"/>
+    <path refid="library.jboss_10.2.0.final.classpath"/>
+    <path refid="library.maven:_com.sun.faces:jsf-api:2.2.13.classpath"/>
+    <path refid="library.maven:_org.hibernate:hibernate-core:5.0.10.final.classpath"/>
+    <path refid="library.maven:_org.jboss.logging:jboss-logging:3.3.0.final.classpath"/>
+    <path refid="library.maven:_org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.final.classpath"/>
+    <path refid="library.maven:_org.javassist:javassist:3.18.1-ga.classpath"/>
+    <path refid="library.maven:_antlr:antlr:2.7.7.classpath"/>
+    <path refid="library.maven:_org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1.1.classpath"/>
+    <path refid="library.maven:_org.jboss:jandex:2.0.0.final.classpath"/>
+    <path refid="library.maven:_dom4j:dom4j:1.6.1.classpath"/>
+    <path refid="library.maven:_xml-apis:xml-apis:1.0.b2.classpath"/>
+    <path refid="library.maven:_org.hibernate.common:hibernate-commons-annotations:5.0.1.final.classpath"/>
+    <path refid="library.maven:_org.hibernate:hibernate-entitymanager:5.0.10.final.classpath"/>
+    <path refid="library.maven:_org.hibernate:hibernate-c3p0:5.0.10.final.classpath"/>
+    <path refid="library.maven:_com.mchange:c3p0:0.9.2.1.classpath"/>
+    <path refid="library.maven:_com.mchange:mchange-commons-java:0.2.3.4.classpath"/>
+    <path refid="library.maven:_javax:javaee-api:7.0.classpath"/>
+    <path refid="library.maven:_com.sun.mail:javax.mail:1.5.0.classpath"/>
+    <path refid="library.maven:_javax.activation:activation:1.1.classpath"/>
+    <path refid="library.maven:_mysql:mysql-connector-java:5.1.39.classpath"/>
+    <path refid="library.maven:_org.primefaces:primefaces:6.0.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.projetoincial">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.projetoincial">
+    <patternset refid="excluded.from.module.projetoincial"/>
+  </patternset>
+  
+  <path id="projetoincial.module.sourcepath">
+    <dirset dir="${module.projetoincial.basedir}">
+      <include name="src/main/java"/>
+      <include name="src/main/resources"/>
+    </dirset>
+  </path>
+  
+  <path id="projetoincial.module.test.sourcepath">
+    <dirset dir="${module.projetoincial.basedir}">
+      <include name="src/test/java"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.projetoincial" depends="compile.module.projetoincial.production,compile.module.projetoincial.tests" description="Compile module ProjetoIncial"/>
+  
+  <target name="compile.module.projetoincial.production" depends="register.custom.compilers" description="Compile module ProjetoIncial; production classes">
+    <mkdir dir="${projetoincial.output.dir}"/>
+    <javac2 destdir="${projetoincial.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.projetoincial}/javac">
+      <compilerarg line="${compiler.args.projetoincial}"/>
+      <bootclasspath refid="projetoincial.module.bootclasspath"/>
+      <classpath refid="projetoincial.module.production.classpath"/>
+      <src refid="projetoincial.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.projetoincial"/>
+    </javac2>
+    
+    <copy todir="${projetoincial.output.dir}">
+      <fileset dir="${module.projetoincial.basedir}/src/main/java">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+      <fileset dir="${module.projetoincial.basedir}/src/main/resources">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.projetoincial.tests" depends="register.custom.compilers,compile.module.projetoincial.production" description="compile module ProjetoIncial; test classes" unless="skip.tests">
+    <mkdir dir="${projetoincial.testoutput.dir}"/>
+    <javac2 destdir="${projetoincial.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.projetoincial}/javac">
+      <compilerarg line="${compiler.args.projetoincial}"/>
+      <bootclasspath refid="projetoincial.module.bootclasspath"/>
+      <classpath refid="projetoincial.module.classpath"/>
+      <src refid="projetoincial.module.test.sourcepath"/>
+      <patternset refid="excluded.from.compilation.projetoincial"/>
+    </javac2>
+    
+    <copy todir="${projetoincial.testoutput.dir}">
+      <fileset dir="${module.projetoincial.basedir}/src/test/java">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="clean.module.projetoincial" description="cleanup module">
+    <delete dir="${projetoincial.output.dir}"/>
+    <delete dir="${projetoincial.testoutput.dir}"/>
+  </target>
+</project>

@@ -1,0 +1,244 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+>
+
+    <div class="topbar">
+
+
+
+
+        <a id="topbar-menu-button" href="#">
+            <i class="fa fa-bars"/>
+        </a>
+
+        <ul class="topbar-menu fadeInDown animated">
+            <li class="profile-item">
+                <a href="/pages/consultorio/perfil.xhtml">
+                    <div class="profile-image">
+                        <p:graphicImage name="images/profile-image.png" library="atlantis-layout" />
+                    </div>
+                    <div class="profile-info">
+                        <span class="topbar-item-name profile-name">#{loginBean.perfil.nome}</span>
+                        <span class="topbar-item-name profile-role">#{loginBean.perfil.alias}</span>
+                    </div>
+                </a>
+
+                <ul class="animated">
+                    <li role="menuitem">
+                        <h:form>
+                            <p:link outcome="/pages/consultorio/perfil.xhtml">
+                                <i class="fa fa-fw fa-user"/>
+                                <span>Perfil</span>
+                            </p:link>
+                        </h:form>
+                    </li>
+                    <!--<li role="menuitem">
+                        <a href="#">
+                            <i class="fa fa-fw fa-user-secret"/>
+                            <span>Privacy</span>
+                            <span class="topbar-submenuitem-badge">2</span>
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a href="#">
+
+                            <i class="fa fa-fw fa-cog"/>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <h:form>
+                            <h:commandLink action="#{loginBean.logout}">
+                                <i class="fa fa-fw fa-sign-out"/>
+                                <span>Sair</span>
+                            </h:commandLink>
+                        </h:form>
+                    </li>
+                    -->
+                </ul>
+            </li>
+
+            <li role="menuitem">
+                <h:form id="formPendent">
+                <a href="#" onClick="redirect()">
+                        <i class="topbar-icon fa fa-fw fa-bell-o" style="
+                          font-size : 28px !important;
+                          color : white !important;
+                           "/>
+                        <span class="topbar-badge animated rubberBand" style="
+                          padding : 2px 4px !important;
+                          position : absolute !important;
+                          right : -5px !important;
+                          top : -5px !important;
+                          background-color : #e42a7b !important;
+                          font-size : 12px !important;
+                          color : #ffffff !important;
+                          line-height : 12px !important;
+                        ">#{loginBean.qtdConsultasPendentesAprovacao}</span>
+                </a>
+                </h:form>
+            </li>
+
+        </ul>
+
+        <!--<li>
+                <a href="#">
+                    <i class="topbar-icon fa fa-fw fa-cog"/>
+                    <span class="topbar-item-name">Settings</span>
+                </a>
+                <ul class="animated">
+                    <li role="menuitem">
+                        <a href="#">
+                            <i class="fa fa-fw fa-paint-brush"/>
+                            <span>Change Theme</span>
+                            <span class="topbar-submenuitem-badge">4</span>
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a href="#">
+                            <i class="fa fa-fw fa-star-o"/>
+                            <span>Favorites</span>
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a href="#">
+                            <i class="fa fa-fw fa-lock"/>
+                            <span>Lock Screen</span>
+                            <span class="topbar-submenuitem-badge">2</span>
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a href="#">
+                            <i class="fa fa-fw fa-picture-o"/>
+                            <span>Wallpaper</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="topbar-icon material-icons animated swing fa fa-fw fa-envelope-o"/>
+                    <span class="topbar-badge animated rubberBand">5</span>
+                    <span class="topbar-item-name">Messages</span>
+                </a>
+                <ul class="animated">
+                    <li role="menuitem">
+                        <a href="#" class="topbar-message">
+                            <p:graphicImage name="images/avatar1.png" library="atlantis-layout" width="35"/>
+                            <span>Give me a call</span>
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a href="#" class="topbar-message">
+                            <p:graphicImage name="images/avatar2.png" library="atlantis-layout" width="35"/>
+                            <span>Reports attached</span>
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a href="#" class="topbar-message">
+                            <p:graphicImage name="images/avatar3.png" library="atlantis-layout" width="35"/>
+                            <span>About your invoice</span>
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a href="#" class="topbar-message">
+                            <p:graphicImage name="images/avatar2.png" library="atlantis-layout" width="35"/>
+                            <span>Meeting today</span>
+                        </a>
+                    </li>
+                    <li role="menuitem">
+                        <a href="#" class="topbar-message">
+                            <p:graphicImage name="images/avatar4.png" library="atlantis-layout" width="35"/>
+                            <span>Out of office</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="search-item">
+                <h:form>
+                    <i class="fa fa-search"/>
+                    <p:inputText />
+                </h:form>
+            </li>
+        </ul>-->
+
+    </div>
+    <!--
+    <h:form id="socketFormBar">
+        <p:remoteCommand name="addPendente" actionListener="#{loginBean.addConsultaPendente}" style="display: none;" />
+        <h:inputHidden id="idConsultorio" value="#{loginBean.perfil.consultorio.id}" />
+
+    </h:form>
+
+    <h:outputScript name="js/socket.io.js" library="atlantis-layout" target="body"/>
+    <script type="text/javascript">
+        function redirect() {
+           //refazer aqui
+        }
+
+        $(document).ready(function() {
+            var stringUrlAbsolute = window.location.href;
+            if (window.localStorage.getItem("urlAbsoluta") != null) {
+                var urlSession = window.localStorage.getItem("urlAbsoluta");
+                if (urlSession != null &amp;&amp; stringUrlAbsolute != urlSession &amp;&amp; urlSession.indexOf("consulta/criar") != -1) {
+                    var urlParams = urlSession.split("&amp;");
+                    var agendaId = urlParams[3];
+                    agendaId = agendaId.split("=")[1];
+                    var diaHoraInicio = urlParams[6];
+                    diaHoraInicio = diaHoraInicio.split("=")[1];
+                    var decodeDiaHoraInicio = decodeURIComponent(diaHoraInicio);
+                    var client = io.connect('https://murmuring-chamber-91453.herokuapp.com/');
+                    client.emit("agendandoCancel", decodeDiaHoraInicio, agendaId);
+
+                    console.log(agendaId);
+                    console.log(diaHoraInicio);
+
+
+
+                    console.log("fazer o cancelamento");
+                    console.log(urlSession);
+
+                    window.localStorage.setItem("urlAbsoluta", stringUrlAbsolute);
+                }
+            }
+
+
+
+         //   setUrlCriando();
+
+            var socketCliente = io.connect('https://murmuring-chamber-91453.herokuapp.com/');
+
+            socketCliente.on("consultaSolicitada",  function (nomeMedico, dia,  horario, idConsulta, idConsultorio) {
+                console.log("chegou consultaSolicitada");
+                var consultorioId = document.getElementById("socketFormBar-idConsultorio").value;
+                if (consultorioId == idConsultorio) {
+                    addPendente();
+                    document.getElementsByClassName("topbar-badge animated rubberBand")[0].style.color = "red";
+                }
+            });
+            console.log(socketCliente);
+            var x = "teste";
+
+
+            /*
+            socket.on("consultaSolicitada",  function (nomeMedico, dia, horario, idConsulta, idconsultorio) {
+
+
+                console.log("veio consultaSolicitada");
+            });
+            */
+
+        });
+
+        //no on, somar 1 ao numero do bell
+        //pegar consultas pendentes e mudar o:
+        //document.getElementsByClassName("topbar-badge animated rubberBand")[0].innerHTML
+
+    </script>
+    !-->
+
+</ui:composition>

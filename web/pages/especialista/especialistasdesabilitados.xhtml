@@ -1,0 +1,102 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.especialistas}</ui:define>
+    <f:metadata>
+        <f:viewParam name="qtdEspecialistaAvailableToRegister" value="#{especialistasDesabilitadosListBean.qtdEspecialistaAvailableToRegister}"/>
+        <f:viewAction action="#{especialistasDesabilitadosListBean.init}"/>
+    </f:metadata>
+    <ui:define name="content">
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.especialistas}" url="/pages/especialista/especialistasdesabilitados.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form>
+                    <p:tabMenu activeIndex="#{param.i}">
+                        <p:menuitem value="#{m.especialistaEnabled}" outcome="/pages/especialista/especialistashabilitados"
+                                    icon="fa fa-fw fa-user-md">
+                            <f:param name="i" value="0"/>
+                        </p:menuitem>
+                        <p:menuitem value="#{m.especialistaDisabled}" outcome="/pages/especialista/especialistasdesabilitados"
+                                    icon="fa fa-fw fa-plus-square">
+                            <f:param name="i" value="1"/>
+                            <f:param name="qtdEspecialistaAvailableToRegister" value="#{especialistasHabilitadosListBean.qtdEspecialistaAvailableToRegister}"/>
+                        </p:menuitem>
+                    </p:tabMenu>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-8" style="margin: 0 auto;">
+                <h:form id="form">
+                    <div class="card">
+                        <font color="red">
+                            Quantidade de Especialistas disponivel para Cadastro: #{especialistasDesabilitadosListBean.qtdEspecialistaAvailableToRegister}
+                        </font>
+                    </div>
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+
+                        <p:dataTable id="dataTable" value="#{especialistasDesabilitadosListBean.especialistasConsultorioList}"
+                                     rows="15"
+                                     paginator="true"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="10,15,20,30"
+                                     var="especialistasconsultorio"
+                                     paginatorPosition="bottom"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <f:facet name="header">
+                                <h:outputText value="#{m.especialistas}"/>
+                            </f:facet>
+                            <p:column headerText="#{m.nome}" sortBy="#{especialistasconsultorio.especialista.nome}"
+                                      filterBy="#{especialistasconsultorio.especialista.nome}" filterMatchMode="contains">
+                                <h:outputText value="#{especialistasconsultorio.especialista.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.editar}">
+                                <h:outputLink value="editar.xhtml" disabled="#{!especialistasconsultorio.habilitado}">
+                                    <f:param name="especialistaId" value="#{especialistasconsultorio.especialista.id}"/>
+                                    <i class="fa fa-pencil"/>
+                                </h:outputLink>
+                            </p:column>
+                            <p:column headerText="#{m.agenda}">
+                                <h:outputLink value="../agenda/agenda.xhtml" disabled="#{!especialistasconsultorio.habilitado}">
+                                    <f:param name="especialistaId" value="#{especialistasconsultorio.especialista.id}"/>
+                                    <f:param name="especialistaNome" value="#{especialistasconsultorio.especialista.nome}"/>
+                                    <i class="fa fa-calendar"/>
+                                </h:outputLink>
+                            </p:column>
+                            <p:column headerText="#{m.habilitarespecialista}">
+                                <p:inputSwitch value="#{especialistasconsultorio.habilitado}"
+                                               rendered="#{especialistasDesabilitadosListBean.permiteHabilitar}"
+                                               onLabel="Ativado"
+                                               offLabel="Desativado">
+                                    <p:ajax listener="#{especialistasDesabilitadosListBean.enableEspecialistaConsultorio(especialistasconsultorio)}" update="form"/>
+                                </p:inputSwitch>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+

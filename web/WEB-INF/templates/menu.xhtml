@@ -1,0 +1,109 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:c="http://java.sun.com/jsp/jstl/core">
+    <link type="text/css" rel="stylesheet"
+          href="../../resources/atlantis-layout/css/showCase.css" />
+    <link type="text/css" rel="stylesheet"
+          href="../../resources/atlantis-layout/css/perfect-scrollbar.css" />
+    <link type="text/css" rel="stylesheet"
+          href="../../resources/atlantis-layout/css/sh.css" />
+    <div class="layout-side-menu" style="">
+
+                <h:form>
+                    <c:set var="urlConsulta" value="/pages/consulta/todas"/>
+                    <c:set var="urlContas" value="/pages/financeiro/contasPagar"/>
+                    <c:set var="urlFaturamento" value="/pages/faturamento/faturamento"/>
+                    <c:set var="urlFatura" value="/pages/fatura/fatura"/>
+                    <c:set var="urlPaciente" value="/pages/paciente/paciente"/>
+                    <c:set var="urlEspecialista" value="/pages/especialista/especialistashabilitados"/>
+                    <c:set var="urlConsultorio" value="/pages/consultorio/consultorio"/>
+                    <c:set var="urlAgendamento" value="/pages/agendamento/agendamento"/>
+                    <c:set var="urlTutorial" value="/pages/tutorial/tutorial"/>
+                    <c:set var="urlDashboard" value="/pages/dashboard/dashboardconsultorio"/>
+
+                    <c:set var="todasConsultas"
+                           value="#{(loginBean.paginaPermissaoMap.get(urlConsulta) != null and loginBean.paginaPermissaoMap.get(urlConsulta).contains('visualizar')) || loginBean.admin}"/>
+                    <c:set var="faturamento"
+                           value="#{(loginBean.paginaPermissaoMap.get(urlFaturamento) != null and loginBean.paginaPermissaoMap.get(urlFaturamento).contains('visualizar')) || loginBean.admin}"/>
+                    <c:set var="contas"
+                           value="#{(loginBean.paginaPermissaoMap.get(urlContas) != null and loginBean.paginaPermissaoMap.get(urlContas).contains('visualizar')) || loginBean.admin}"/>
+                    <c:set var="fatura"
+                           value="#{(loginBean.paginaPermissaoMap.get(urlFatura) != null and loginBean.paginaPermissaoMap.get(urlFatura).contains('visualizar')) || loginBean.admin}"/>
+                    <c:set var="paciente"
+                           value="#{(loginBean.paginaPermissaoMap.get(urlPaciente) != null and loginBean.paginaPermissaoMap.get(urlPaciente).contains('visualizar')) || loginBean.admin}"/>
+                    <c:set var="especialista"
+                           value="#{(loginBean.paginaPermissaoMap.get(urlEspecialista) != null and loginBean.paginaPermissaoMap.get(urlEspecialista).contains('visualizar')) || loginBean.admin}"/>
+                    <c:set var="consultorio"
+                           value="#{(loginBean.paginaPermissaoMap.get(urlConsultorio) != null and loginBean.paginaPermissaoMap.get(urlConsultorio).contains('visualizar')) || loginBean.admin}"/>
+                    <c:set var="agendamento"
+                           value="#{(loginBean.paginaPermissaoMap.get(urlAgendamento) != null and loginBean.paginaPermissaoMap.get(urlAgendamento).contains('visualizar')) || loginBean.admin}"/>
+                    <c:set var="tutorial"
+                           value="#{(loginBean.paginaPermissaoMap.get(urlTutorial) != null and loginBean.paginaPermissaoMap.get(urlTutorial).contains('visualizar')) || loginBean.admin}"/>
+                    <c:set var="dashboard"
+                           value="#{(loginBean.paginaPermissaoMap.get(urlDashboard) != null and loginBean.paginaPermissaoMap.get(urlDashboard).contains('visualizar')) || loginBean.admin}"/>
+
+                    <br></br>
+                    <div id="MENUSIDE">
+                        <div id="MENUSIDEindent">
+                        <span id="LOGO" class="bordersOfMenuSide"><img src="/resources/atlantis-layout/images/logo_verde_cinza.png" /><img id="BlueLogo" src="/resources/atlantis-layout/images/logo-verde.png" class="hiddenLogo" />
+                        </span>
+                            <div class="MenuSideMainLink bordersOfMenuSide"><input id="menuSearch" type="text" placeholder="Search Menu" class="boldFont fontSize14 mustClose searchInput" /></div>
+
+                            <span id="perfilClinicaSpan" class="MenuSideMainLink bordersOfMenuSide" onclick="Showcase.openSubMenu(this);"><img src="/resources/atlantis-layout/images/menu/perfil_clinica_cinza.png" /><img src="/resources/atlantis-layout/images/menu/perfil_clinica_verde.png" class="hiddenIcons" /><span class="MainLinkText">Perfil da Clínica</span></span>
+                            <div class="SubMenuLinkContainer">
+                                <a class="SubMenuLink" href="/pages/dashboard/dashboardconsultorio.xhtml">• Dashboard</a>
+                                <a class="SubMenuLink" href="/pages/consultorio/consultorio.xhtml">• Consultório</a>
+                                <a class="SubMenuLink" href="/pages/especialista/especialistashabilitados.xhtml">• Especialistas</a>
+                            </div>
+
+                            <span id="financeiroSpan" class="MenuSideMainLink bordersOfMenuSide" onclick="Showcase.openSubMenu(this);"><img src="/resources/atlantis-layout/images/menu/financeiro_cinza.png" /><img src="/resources/atlantis-layout/images/menu/financeiro_verde.png" class="hiddenIcons" /><span class="MainLinkText">Financeiro</span></span>
+                            <div class="SubMenuLinkContainer">
+                                <a class="SubMenuLink" href="/pages/faturamento/faturamento.xhtml">• Faturamento</a>
+                                <a class="SubMenuLink" href="/pages/fatura/fatura.xhtml">• Faturas</a>
+                                <a class="SubMenuLink" href="/pages/financeiro/contasPagar.xhtml">• Contas a pagar</a>
+                            </div>
+
+                            <span id="agendamentoSpan" class="MenuSideMainLink bordersOfMenuSide" onclick="Showcase.openDirectLink('/pages/agendamento/agendamento.xhtml');"><img src="/resources/atlantis-layout/images/menu/agendamento_cinza.png" /><img src="/resources/atlantis-layout/images/menu/agendamento_verde.png" class="hiddenIcons" /><span class="MainLinkText">Agendamento</span></span>
+                            <div class="SubMenuLinkContainer">
+                                <a class="SubMenuLink" href="#">• Agendamento</a>
+                            </div>
+                            <span id="todasConsultasSpan" class="MenuSideMainLink bordersOfMenuSide" onclick="Showcase.openDirectLink('/pages/consulta/todas.xhtml');"><img src="/resources/atlantis-layout/images/menu/proximas_consulta_cinza.png" /><img src="/resources/atlantis-layout/images/menu/proximas_consulta_verde.png" class="hiddenIcons" /><span class="MainLinkText">Próximas Consultas</span></span>
+                            <div class="SubMenuLinkContainer">
+                                <a class="SubMenuLink" href="#">• Próximas Consultas</a>
+                            </div>
+                            <span id="pacientesSpan" class="MenuSideMainLink bordersOfMenuSide" onclick="Showcase.openDirectLink('/pages/paciente/paciente.xhtml');"><img src="/resources/atlantis-layout/images/menu/pacientes_cinza.png" /><img src="/resources/atlantis-layout/images/menu/pacientes_verde.png" class="hiddenIcons" /><span class="MainLinkText">Pacientes</span></span>
+                            <div class="SubMenuLinkContainer">
+                                <a class="SubMenuLink" href="#">• Pacientes</a>
+                            </div>
+                            <span id="tutorialSpan" class="MenuSideMainLink bordersOfMenuSide" onclick="Showcase.openDirectLink('/pages/tutorial/tutorial.xhtml');"><img src="/resources/atlantis-layout/images/menu/tutorial_cinza.png" /><img src="/resources/atlantis-layout/images/menu/tutorial_verde.png" class="hiddenIcons" /><span class="MainLinkText">Tutorial</span></span>
+                            <div class="SubMenuLinkContainer">
+                                <a class="SubMenuLink" href="#">• Tutorial</a>
+                            </div>
+                            <span id="sairSpan" class="MenuSideMainLink bordersOfMenuSide" onclick="sair();"><img src="/resources/atlantis-layout/images/menu/sair_cinza.png" /><img src="/resources/atlantis-layout/images/menu/sair_verde.png" class="hiddenIcons" /><span class="MainLinkText">Sair</span></span>
+                            <div class="SubMenuLinkContainer">
+                                <a class="SubMenuLink" href="#">• Sair</a>
+                            </div>
+                            <a id="mobile-menu-btn" href="#">
+                                <i class="fa fa-bars"></i>
+                            </a>
+                        </div>
+
+                    </div>
+                    <p:remoteCommand name="deslogar" actionListener="#{loginBean.logout}" oncomplete="afterLogout()" immediate="true" />
+                </h:form>
+    </div>
+
+    <script type="text/javascript" src="../../resources/atlantis-layout/js/perfect-scrollbar.js"></script>
+    <script type="text/javascript" src="../../resources/atlantis-layout/js/showcase.js"></script>
+    <script type="text/javascript">
+        function sair(){
+            deslogar();
+        }
+        function afterLogout() {
+            window.location.href = "/login.xhtml?faces-redirect=true";
+        }
+    </script>
+</ui:composition>

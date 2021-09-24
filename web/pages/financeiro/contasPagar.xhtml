@@ -1,0 +1,164 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui" xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.contasPagar}</ui:define>
+
+    <ui:define name="content">
+        <f:metadata>
+            <f:viewAction action="#{contasPagarBean.init}"/>
+        </f:metadata>
+
+        <o:importConstants type="br.com.devdojo.projetoinicial.persistence.model.enums.StatusFaturaEnum"/>
+        <c:set value="#{loginBean.paginaPermissaoMap.get(request.requestURI.substring(request.contextPath.length())).contains('editar') or loginBean.admin}" var="permissaoEditar"/>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.contasPagar}" url="/pages/financeiro/contasPagar.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="form">
+                    <div class="card">
+                        <p:panelGrid columns="3" styleClass="ui-panelgrid-blank form-group" layout="grid">
+                            <p:selectOneMenu layout="responsive"
+                                             value="#{contasPagarBean.statusFaturaEnum}"
+                                             required="true" id="estadoCivil">
+                                <f:selectItems value="#{StatusFaturaEnum}" var="status"
+                                               itemValue="#{status}" itemLabel="Status: #{status}"/>
+                                <p:ajax event="change" listener="#{contasPagarBean.search}" update="dataTable"/>
+                            </p:selectOneMenu>
+
+                            <p:calendar value="#{contasPagarBean.inicio}"
+                                        id="inicio"
+                                        required="true" requiredMessage="#{m.requiredDataInicio}"
+                                        placeholder="#{m.dataInicio}" navigator="true"
+                                        pattern="dd/MM/yyyy"
+                                        mask="true" locale="#{loginBean.locale}"/>
+
+                            <p:calendar value="#{contasPagarBean.fim}"
+                                        id="fim"
+                                        required="true" requiredMessage="#{m.requiredDataFim}"
+                                        locale="#{loginBean.locale}"
+                                        placeholder="#{m.dataFim}" navigator="true" pattern="dd/MM/yyyy"
+                                        mask="true"/>
+                        </p:panelGrid>
+
+                        <p:panelGrid columns="3" styleClass="ui-panelgrid-blank form-group" layout="grid">
+
+                            <p:selectOneMenu id="especialista" value="#{contasPagarBean.especialista}"
+                                             required="true" requiredMessage="#{m.requiredEspecialista}" converter="entityConverter" filter="true"
+                                             filterMatchMode="startsWith">
+                                <f:selectItem itemValue="#{null}" itemLabel="Selecione um especialista"/>
+                                <f:selectItems var="especialista" itemValue="#{especialista}"
+                                               itemLabel="#{especialista.nome}"
+                                               value="#{contasPagarBean.especialistaList}"/>
+                            </p:selectOneMenu>
+
+                            <p:selectCheckboxMenu id="comboConvenio"
+                                                  value="#{contasPagarBean.convenioIdListSelected}"
+                                                  required="true" requiredMessage="#{m.requiredConvenio}"
+                                                  var="convenio" filter="true" filterMatchMode="contains"
+                                                  label="Selecione os Convênios">
+                                <f:selectItems value="#{applicationBean.convenioList}"
+                                               var="convenio" itemLabel="#{convenio.nome}"
+                                               itemValue="#{convenio.id}"/>
+                            </p:selectCheckboxMenu>
+
+                        </p:panelGrid>
+
+                        <p:panelGrid columns="3" styleClass="ui-panelgrid-blank form-group" layout="grid">
+
+                            <p:commandButton value="#{m.buscar}" actionListener="#{contasPagarBean.search}"
+                                             update="dataTable"/>
+
+                            <p:commandButton value="Imprimir Tabela" action="#{contasPagarBean.imprimirContasPagar}" target="_blank" icon="ui-icon-print" >
+                            </p:commandButton>
+                        </p:panelGrid>
+                    </div>
+
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+
+                        <p:dataTable id="dataTable" var="faturaProc" value="#{contasPagarBean.faturaProcedimentosList}"
+                                     rows="10"
+                                     paginator="true"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     paginatorPosition="bottom"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <f:facet name="header">
+                                <h:outputText value="#{m.contasPagar}"/>
+                            </f:facet>
+
+                            <p:column headerText="#{m.especialista}">
+                                <h:outputText value="#{faturaProc.procedimentoEspecialista.especialista.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.paciente}">
+                                <h:outputText value="#{faturaProc.fatura.paciente.usuario.nome}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.especialidade}">
+                                <h:outputText value="#{faturaProc.consulta.especialidade.especialidade}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.numeroDaGuia}">
+                                <h:outputText value="#{faturaProc.guia}"/>
+                            </p:column>
+
+                            <p:column headerText="#{m.dataDaConsulta}">
+                                <h:outputText value="#{faturaProc.consulta.horaInicio}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                                </h:outputText>
+                                <f:facet name="footer">
+                                    <h:outputText style="font-weight:bold" value="Valor total:" />
+                                </f:facet>
+                            </p:column>
+
+                            <p:column headerText="#{m.valorpago}">
+                                <h:outputText value="#{faturaProc.fatura.valorpago}">
+                                    <f:convertNumber type="currency" currencySymbol="R$ "/>
+                                </h:outputText>
+                                <f:facet name="footer">
+                                    <h:outputText styleClass="valorTotalOut" value="#{contasPagarBean.valorTotal}">
+                                        <f:convertNumber type="currency" currencySymbol="R$" locale="pt_BR" />
+                                    </h:outputText>
+                                </f:facet>
+                            </p:column>
+
+                        </p:dataTable>
+                        <br></br>
+                    </div>
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes"
+                                         icon="ui-icon-check"/>
+                        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no"
+                                         icon="ui-icon-close"/>
+                    </p:confirmDialog>
+                </h:form>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>
+

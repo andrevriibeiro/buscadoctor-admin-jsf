@@ -1,0 +1,196 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui"
+                xmlns:of="http://omnifaces.org/functions"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.agendaMensal}</ui:define>
+    <f:metadata>
+        <f:viewParam name="especialistaId" value="#{agendaMensalRegisBean.especialistaId}"/>
+        <f:viewParam name="inicio" value="#{agendaMensalRegisBean.inicio}"/>
+        <f:viewParam name="fim" value="#{agendaMensalRegisBean.fim}"/>
+        <f:viewParam name="agendaTipoId" value="#{agendaMensalRegisBean.agendaTipoId}"/>
+        <f:viewAction action="#{agendaMensalRegisBean.init}"/>
+    </f:metadata>
+
+    <ui:define name="content">
+        <o:importConstants type="br.com.devdojo.projetoinicial.persistence.model.enums.AgendaTipoEnum"/>
+        <o:importConstants type="br.com.devdojo.projetoinicial.persistence.model.enums.DiasDaSemanaEnum"/>
+
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.especialistas}" url="/pages/especialista/especialistashabilitados.xhtml"/>
+                        <p:menuitem value="#{m.listarAgendas}"
+                                    url="/pages/agenda/agenda.xhtml?especialistaId=#{agendaMensalRegisBean.especialistaId}&amp;inicio=#{agendaMensalRegisBean.inicio}&amp;fim=#{agendaMensalRegisBean.fim}"/>
+                        <p:menuitem value="#{m.agendaMensal}"
+                                    url="/pages/agenda/criarmensal.xhtml?especialistaId=#{agendaMensalRegisBean.especialistaId}&amp;inicio=#{agendaMensalRegisBean.inicio}&amp;fim=#{agendaMensalRegisBean.fim}&amp;agendaTipoId=#{agendaMensalRegisBean.agendaTipoId}"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+
+        <div class="ui-g">
+            <div class="ui-g-12 ui-lg-10" style="margin: 0 auto;">
+                <h:form id="form">
+                    <div class="card">
+                        <p:link value="#{m.listarAgendas}" outcome="agenda">
+                            <f:param name="especialistaId" value="#{agendaMensalRegisBean.especialistaId}"/>
+                            <f:param name="inicio" value="#{agendaMensalRegisBean.inicio}"/>
+                            <f:param name="fim" value="#{agendaMensalRegisBean.fim}"/>
+                        </p:link>
+                    </div>
+                    <div class="card">
+                        <p:panelGrid columns="1" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                            <p:outputLabel value="Selecione o ano desejado para essa agenda"/>
+                            <p:selectOneMenu value="#{agendaMensalRegisBean.yearSelected}">
+                                <f:selectItems value="#{agendaMensalRegisBean.availableYears}" var="ano"
+                                               itemValue="#{ano}"/>
+                                <p:ajax update="form" listener="#{agendaMensalRegisBean.init}"/>
+                            </p:selectOneMenu>
+                        </p:panelGrid>
+                    </div>
+                    <div class="card">
+
+                        <p:panelGrid columns="13" layout="grid" styleClass="ui-panelgrid-blank center">
+                            <p:selectManyButton value="#{agendaMensalRegisBean.monthsSelectedList}"
+                                                converter="dateToStringDDMMYYYYConverter">
+                                <f:selectItems value="#{agendaMensalRegisBean.monthsList}" var="month"
+                                               itemLabel="#{of:formatDate(month,'MMMM')}" itemValue="#{month}"/>
+                                <f:ajax event="change" listener="#{agendaMensalRegisBean.addOrRemoveMeses}"
+                                        render="time diasDaSemana btnCadastrar"/>
+                            </p:selectManyButton>
+                        </p:panelGrid>
+
+                        <h:panelGroup id="diasDaSemana">
+                            <p:panelGrid columns="8" layout="grid" styleClass="ui-panelgrid-blank center">
+                                <p:selectManyButton value="#{agendaMensalRegisBean.diasDaSemanaSelectedList}"
+                                                    disabled="#{agendaMensalRegisBean.monthsSelectedList.size() == 0}">
+                                    <f:selectItems value="#{agendaMensalRegisBean.diasDaSemanaList}" var="dia"
+                                                   itemLabel="#{dia.label}" itemValue="#{dia}"/>
+
+                                    <f:converter converterId="omnifaces.GenericEnumConverter"/>
+                                    <p:ajax event="change" listener="#{agendaMensalRegisBean.addOrRemoveDiasDaSemana}"
+                                            update="time btnCadastrar"/>
+                                </p:selectManyButton>
+                            </p:panelGrid>
+                        </h:panelGroup>
+
+                    </div>
+                    <div class="card">
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                        <h:panelGroup id="time">
+                            <c:forEach items="#{agendaMensalRegisBean.diaDaSemanaHorarioMap.entrySet().toArray()}"
+                                       var="entry">
+                                <p:panelGrid columns="5" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                                    <h:outputText value="#{entry.key.label}"/>
+
+                                    <p:commandLink
+                                            actionListener="#{agendaMensalRegisBean.adicionarCamposHoraInicioHoraFimParaDiaDaSemana(entry.key)}"
+                                            update="time">
+                                        <i class="fa fa-plus" aria-hidden="true"/>
+                                    </p:commandLink>
+                                    <!--<p:fragment autoUpdate="true">-->
+                                    <p:commandLink immediate="true">
+                                        <f:ajax render="time diasDaSemana"
+                                                listener="#{agendaMensalRegisBean.removerUltimaAgendaCriadaParaDeterminadoDiaDaSemana(entry.key)}"/>
+                                        <i class="fa fa-minus" aria-hidden="true"/>
+                                    </p:commandLink>
+                                    <!--</p:fragment>-->
+                                </p:panelGrid>
+
+                                <p:panelGrid columns="12" layout="grid" styleClass="ui-panelgrid-blank form-group">
+                                    <c:forEach items="#{entry.value}" var="agenda" varStatus="status">
+                                        <h:outputLabel value="#{m.horaInicio}" for="horaInicio"/>
+                                        <p:calendar value="#{entry.value.get(status.index).dataInicio}"
+                                                    size="5"
+                                                    showOn="button"
+                                                    id="horaInicio"
+                                                    timeOnly="true"
+                                                    pattern="HH:mm"
+                                                    mask="true"
+                                                    converterMessage="#{m.errorHoraInicial}"
+                                                    required="true" requiredMessage="#{m.requiredHoraInicio}"
+                                                    label="#{m.dataInicio}">
+                                            <p:ajax/>
+                                        </p:calendar>
+                                        <h:outputLabel value="#{m.horaFim}" for="horaFinal"/>
+
+                                        <p:calendar value="#{entry.value.get(status.index).dataFinal}"
+                                                    size="5"
+                                                    id="horaFinal"
+                                                    showOn="button"
+                                                    timeOnly="true"
+                                                    pattern="HH:mm"
+                                                    mask="true"
+                                                    converterMessage="#{m.errorHoraFinal}"
+                                                    required="true" requiredMessage="#{m.requiredHoraFim}"
+                                                    label="#{m.dataFim}">
+                                            <p:ajax/>
+                                        </p:calendar>
+
+                                        <h:outputLabel value="#{m.tempoDeConsulta}" for="tempo"/>
+                                        <p:inputText value="#{entry.value.get(status.index).tempoConsulta}"
+                                                     onkeypress="if(((event.which === 8 || event.which === 46))) return true; else if(event.which &lt; 48 || event.which &gt; 57) return false;"
+                                                     size="5"
+                                                     required="true"
+                                                     requiredMessage="Favor preencher o tempo da consulta"
+                                                     id="tempo">
+                                            <p:ajax event="blur" update="qtde" process="@this horaInicio horaFinal"
+                                                    listener="#{agendaMensalRegisBean.calcularQuantidadeDeConsultasPossiveisParaOIntervaloDeHoras(entry.value.get(status.index))}"/>
+                                        </p:inputText>
+                                        <h:outputLabel for="qtde" value="Quantidade de consultas"/>
+                                        <p:outputLabel id="qtde"
+                                                       value="#{entry.value.get(status.index).quantidadeDeConsultas}"/>
+                                        <h:outputLabel value="#{m.liberarAgenda}" for="tempo"/>
+                                        <p:inputSwitch value="#{entry.value.get(status.index).liberado}"
+                                                       onLabel="Sim" offLabel="Não">
+                                            <p:ajax/>
+                                        </p:inputSwitch>
+                                        <h:outputLabel value="#{m.visivelApp}" for="tempo"/>
+                                        <p:inputSwitch value="#{entry.value.get(status.index).visivelApp}"
+                                                       onLabel="Sim" offLabel="Não">
+                                            <p:ajax/>
+                                        </p:inputSwitch>
+                                    </c:forEach>
+                                </p:panelGrid>
+                            </c:forEach>
+                        </h:panelGroup>
+                    </div>
+                    <div class="card">
+                        <p:panelGrid columns="3" styleClass="ui-panelgrid-blank form-group" style="width: 30%">
+
+                            <p:button value="#{m.cancelar}" outcome="agenda">
+                                <f:param name="especialistaId" value="#{agendaMensalRegisBean.especialistaId}"/>
+                                <f:param name="inicio" value="#{agendaMensalRegisBean.inicio}"/>
+                                <f:param name="fim" value="#{agendaMensalRegisBean.fim}"/>
+                            </p:button>
+
+                            <p:commandButton id="btnCadastrar" value="#{m.cadastrarAgenda}"
+                                             action="#{agendaMensalRegisBean.save}"
+                                             disabled="#{agendaMensalRegisBean.diaDaSemanaHorarioMap.entrySet().size() == 0}"/>
+
+                        </p:panelGrid>
+                    </div>
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                                  oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 15000)"/>
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+                </h:form>
+            </div>
+        </div>
+        <script type="text/javascript">var disabledDays = eval(#{agendaDiariaRegisBean.datasRestritas});</script>
+        <h:outputScript name="js/disabledays.js" library="atlantis-layout" target="body"/>
+    </ui:define>
+
+</ui:composition>
+

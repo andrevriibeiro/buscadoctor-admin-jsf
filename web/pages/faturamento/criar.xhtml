@@ -1,0 +1,105 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui" xmlns:f="http://xmlns.jcp.org/jsf/core"
+                template="/WEB-INF/templates/template.xhtml">
+
+    <ui:define name="title">#{m.faturamento}</ui:define>
+
+    <ui:define name="content">
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-6" style="margin: 0 auto;">
+                <h:form id="formBreadCrumb">
+                    <p:breadCrumb>
+                        <p:menuitem value="home" url="/pages/paciente/paciente.xhtml"/>
+                        <p:menuitem value="#{m.faturamentos}" url="/pages/faturamento/faturamento.xhtml"/>
+                        <p:menuitem value="#{m.criarFaturamento}" url="/pages/faturamento/criar.xhtml"
+                                    styleClass="breadcrumb-active"/>
+                    </p:breadCrumb>
+                </h:form>
+            </div>
+        </div>
+        <div class="ui-g ui-fluid">
+            <div class="ui-g-12 ui-lg-6" style="margin: 0 auto;">
+                <h:form id="form">
+                    <div class="card">
+                        <h:link outcome="faturamento" value="Listar Faturamentos"/>
+                    </div>
+                    <div class="card">
+                        <h2>#{m.criarFaturamento}</h2>
+                        <p:panelGrid id="panelGrid" columns="1" styleClass="ui-panelgrid-blank form-group"
+                                     style="width: 60%">
+
+                            <p:outputLabel value="Data início" for="inicio"/>
+                            <p:calendar value="#{faturamentoRegisBean.inicio}"
+                                        id="inicio" required="true"
+                                        placeholder="#{m.dataInicioConsultas}" navigator="true"
+                                        pattern="dd/MM/yyyy" requiredMessage="A data de inicio é obrigatória"
+                                        locale="#{loginBean.locale}"
+                                        mask="true">
+                                <p:ajax event="dateSelect" listener="#{faturamentoRegisBean.buscarFaturamentosPeriodo}"
+                                        update="dataTable"/>
+
+                            </p:calendar>
+                            <p:outputLabel value="Data fim" for="fim"/>
+                            <p:calendar value="#{faturamentoRegisBean.fim}"
+                                        id="fim" required="true"
+                                        placeholder="#{m.dataFimConsultas}" navigator="true" pattern="dd/MM/yyyy"
+                                        locale="#{loginBean.locale}"
+                                        requiredMessage="A data fim é obrigatória"
+                                        mask="true">
+                                <p:ajax event="dateSelect" listener="#{faturamentoRegisBean.buscarFaturamentosPeriodo}"
+                                        update="dataTable"/>
+                            </p:calendar>
+                            <!--<p:focus context="panelGrid"/>-->
+                        </p:panelGrid>
+                    </div>
+                    <div class="card">
+                        <p:dataTable id="dataTable" var="convenio" value="#{applicationBean.convenioList}"
+                                     selection="#{faturamentoRegisBean.convenioListSelected}"
+                                     rowKey="#{convenio.id}"
+                                     resizableColumns="true"
+                                     reflow="true"
+                                     tableStyle="text-align: center; table-layout: auto">
+                            <f:facet name="header">
+                                <h:outputText value="#{m.convenios}"/>
+                            </f:facet>
+                            <p:column selectionMode="multiple" style="width:16px;"
+                                      rendered="#{!faturamentoRegisBean.conveniosSamePeriod.contains(convenio)}"/>
+
+                            <p:column rendered="#{faturamentoRegisBean.conveniosSamePeriod.contains(convenio)}"
+                                      filterBy="">
+                                <h:outputText value=""/>
+                            </p:column>
+
+                            <p:column headerText="Nome" filterBy="#{convenio.nome}"  filterMatchMode="contains"
+                                      style="background-color: #{faturamentoRegisBean.conveniosSamePeriod.contains(convenio) ? 'lightgrey' : ''} ">
+                                <h:outputText value="#{convenio.nome}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                    <div class="card">
+                        <p:panelGrid columns="2" styleClass="ui-panelgrid-blank form-group">
+                            <h:outputLink value="faturamento.xhtml">
+                                <p:button value="#{m.cancelar}"/>
+                            </h:outputLink>
+                            <p:commandButton value="Criar Faturamento" action="#{faturamentoRegisBean.create}"
+                                             update="@form"
+                                             oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 5000)"/>
+                        </p:panelGrid>
+                        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+                    </div>
+
+                    <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()"
+                    />
+                    <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false"
+                              showHeader="false">
+                        <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"/>
+                    </p:dialog>
+
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>
+
